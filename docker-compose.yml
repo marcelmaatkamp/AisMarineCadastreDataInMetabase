@@ -66,7 +66,7 @@ services:
     volumes: [.:/mnt]
 
   postgres:
-    image: postgres:13
+    image: postgres:14
     container_name: postgres
     restart: always
     ports:
@@ -93,4 +93,4 @@ services:
       MB_DB_USER: ${POSTGRES_USERNAME}
       MB_DB_PASS: ${POSTGRES_PASSWORD}
     ports:
-      - 3030:3000
+      - 3000:3000

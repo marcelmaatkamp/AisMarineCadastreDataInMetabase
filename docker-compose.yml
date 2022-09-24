@@ -1,0 +1,73 @@
+services:
+  redpanda:
+    image: docker.vectorized.io/vectorized/redpanda:${REDPANDA_VERSION}
+    container_name: redpanda
+    command:
+     - redpanda start
+     - --overprovisioned
+     - --smp 1
+     - --memory 1G
+     - --reserve-memory 0M
+     - --node-id 0
+     - --check=false
+     - --kafka-addr 0.0.0.0:9092
+     - --advertise-kafka-addr redpanda:9092
+     - --pandaproxy-addr 0.0.0.0:8082
+     - --advertise-pandaproxy-addr redpanda:8082
+     - --set redpanda.enable_transactions=true
+     - --set redpanda.enable_idempotence=true
+    ports:
+     - 9092:9092
+     - 8081:8081
+     - 8082:8082
+    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+
+  redpanda-console:
+    image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
+    container_name: redpanda-console
+    restart: on-failure
+    entrypoint: /bin/sh
+    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda:9092"]
+          schemaRegistry:
+            enabled: true
+            urls: ["http://redpanda:8081"]
+        connect:
+          enabled: true
+          clusters:
+            - name: datagen
+              url: http://connect:8083
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redpanda
+
+  materialized:
+    image: materialize/materialized:${MATERIALIZE_VERSION}
+    container_name: materialized
+    command: -w2 --log-filter debug
+    depends_on: [redpanda]
+    ports:
+      - 6875:6875
+    healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
+    init: true
+
+  materialized-cli:
+    image: materialize/cli:${MATERIALIZE_VERSION}
+    container_name: materialized-cli
+    command: -f /mnt/mz_views.sql
+    depends_on:
+      materialized: { condition: service_healthy }
+      redpanda: { condition: service_healthy }
+    volumes: [.:/mnt]
+
+  metabase:
+    image: metabase/metabase:${METABASE_VERSION}
+    container_name: metabase
+    depends_on: [materialized]
+    ports:
+      - 3030:3000

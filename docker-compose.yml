@@ -17,9 +17,9 @@ services:
      - --set redpanda.enable_transactions=true
      - --set redpanda.enable_idempotence=true
     ports:
-     - 9092:9092
      - 8081:8081
      - 8082:8082
+     - 9092:9092
     healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
 
   redpanda-console:
@@ -65,9 +65,32 @@ services:
       redpanda: { condition: service_healthy }
     volumes: [.:/mnt]
 
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: materialize
+      POSTGRES_USER=: materialize
+      POSTGRES_PASSWORD: materialize
+    volumes:
+      - ./etc/postgres/pgdata:/var/lib/postgresql/data
+
   metabase:
     image: metabase/metabase:${METABASE_VERSION}
     container_name: metabase
     depends_on: [materialized]
+    volumes:
+      - "./etc/metabase/data:/metabase-data"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_HOST: postgres
+      MB_DB_PORT: 5432
+      MB_DB_DBNAME: materialize
+      MB_DB_USER: materialize
+      MB_DB_PASS: materialize
     ports:
-      - 3030:3000
+      - "3000:3000"

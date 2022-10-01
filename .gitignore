@@ -1,3 +1,6 @@
 /.idea/
 /terraform/metabase/.terraform.lock.hcl
 /terraform/metabase/.terraform/
+
+etc/metabase/data
+etc/postgres/pgdata/

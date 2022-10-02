@@ -21,8 +21,8 @@ services:
      - --reserve-memory 0M
      - --node-id 0
      - --check=false
-     - --kafka-addr 0.0.0.0:9092
-     - --advertise-kafka-addr redpanda:9092
+     - --kafka-addr 0.0.0.0:${REDPANDA_PORT_KAFKA_INTERNAL}
+     - --advertise-kafka-addr redpanda:${REDPANDA_PORT_KAFKA_INTERNAL}
      - --pandaproxy-addr 0.0.0.0:${REDPANDA_PORT_HTTP_INTERNAL}
      - --advertise-pandaproxy-addr redpanda:${REDPANDA_PORT_HTTP_INTERNAL}
      - --set redpanda.enable_transactions=true
@@ -45,15 +45,15 @@ services:
       CONFIG_FILEPATH: /tmp/config.yml
       CONSOLE_CONFIG_FILE: |
         kafka:
-          brokers: ["redpanda:9092"]
+          brokers: ["redpanda:${REDPANDA_PORT_KAFKA_INTERNAL}"]
           schemaRegistry:
             enabled: true
-            urls: ["http://redpanda:8081"]
+            urls: ["http://redpanda:${REDPANDA_PORT_SCHEMA_INTERNAL}"]
         connect:
           enabled: true
           clusters:
             - name: datagen
-              url: http://connect:8083
+              url: http://connect:${REDPANDA_PORT_CONNECT_INTERNAL}
     ports:
       - "${REDPANDA_CONSOLE_PORT_EXTERNAL}:${REDPANDA_CONSOLE_PORT_INTERNAL}"
     depends_on:
@@ -92,18 +92,27 @@ services:
     volumes:
       - ./etc/postgres/pgdata:/var/lib/postgresql/data
 
-  adminer:
-    image: docker.io/library/adminer:4.8.1-standalone
-    container_name: adminer
-    depends_on:
-      - postgres
-    environment:
-      ADMINER_DEFAULT_DB_DRIVER: pgsql
-      ADMINER_DEFAULT_DB_HOST: postgres
-      ADMINER_DEFAULT_DB_NAME: adminer
+  sqlpad:
+    image: sqlpad/sqlpad:6
+    container_name: sqlpad
     ports:
-      - "${ADMINER_PORT_EXTERNAL}:${ADMINER_PORT_INTERNAL}"
-
+      - "${SQLPAD_PORT_EXTERNAL}:${SQLPAD_PORT_INTERNAL}"
+    environment:
+      SQLPAD_ADMIN: "admin@sqlpad.com"
+      SQLPAD_ADMIN_PASSWORD: "admin"
+      SQLPAD_APP_LOG_LEVEL: debug
+      SQLPAD_WEB_LOG_LEVEL: warn
+      SQLPAD_SEED_DATA_PATH: /etc/sqlpad/seed-data
+      SQLPAD_CONNECTIONS__pgdemo__name: postgres
+      SQLPAD_CONNECTIONS__pgdemo__driver: postgres
+      SQLPAD_CONNECTIONS__pgdemo__host: postgres
+      SQLPAD_CONNECTIONS__pgdemo__database: ${POSTGRES_DATABASE}
+      SQLPAD_CONNECTIONS__pgdemo__username: ${POSTGRES_USERNAME}
+      SQLPAD_CONNECTIONS__pgdemo__password: ${POSTGRES_PASSWORD}
+      SQLPAD_CONNECTIONS__pgdemo__multiStatementTransactionEnabled: "true"
+      SQLPAD_CONNECTIONS__pgdemo__idleTimeoutSeconds: 86400
+    volumes:
+      - "./etc/sqlpad/seed-data:/etc/sqlpad/seed-data"
   metabase:
     image: metabase/metabase:${METABASE_VERSION}
     container_name: metabase

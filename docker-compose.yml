@@ -1,4 +1,15 @@
 services:
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    environment:
+      - "NGINX_PORT=${NGINX_PORT_INTERNAL}"
+    volumes:
+      - ./etc/nginx/html:/usr/share/nginx/html:ro
+    ports:
+      - "${NGINX_PORT_EXTERNAL}:${NGINX_PORT_INTERNAL}"
+
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:${REDPANDA_VERSION}
     container_name: redpanda
@@ -12,15 +23,17 @@ services:
      - --check=false
      - --kafka-addr 0.0.0.0:9092
      - --advertise-kafka-addr redpanda:9092
-     - --pandaproxy-addr 0.0.0.0:8082
-     - --advertise-pandaproxy-addr redpanda:8082
+     - --pandaproxy-addr 0.0.0.0:${REDPANDA_PORT_HTTP_INTERNAL}
+     - --advertise-pandaproxy-addr redpanda:${REDPANDA_PORT_HTTP_INTERNAL}
      - --set redpanda.enable_transactions=true
      - --set redpanda.enable_idempotence=true
     ports:
-     - 8081:8081
-     - 8082:8082
-     - 9092:9092
-    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+     - "${REDPANDA_PORT_SCHEMA_EXTERNAL}:${REDPANDA_PORT_SCHEMA_INTERNAL}"          # Schema Registry port
+     - "${REDPANDA_PORT_HTTP_EXTERNAL}:${REDPANDA_PORT_HTTP_INTERNAL}"              # HTTP Proxy port
+     - "${REDPANDA_PORT_KAFKA_EXTERNAL}:${REDPANDA_PORT_KAFKA_INTERNAL}"            # Kafka API port
+     - "${REDPANDA_PORT_PROMETHEUS_EXTERNAL}:${REDPANDA_PORT_PROMETHEUS_INTERNAL}"  #  Prometheus and HTTP admin port
+     - "${REDPANDA_PORT_GRPC_EXTERNAL}:${REDPANDA_PORT_GRPC_INTERNAL}"              # internal RPC port
+    healthcheck: {test: "curl -f localhost:${REDPANDA_PORT_PROMETHEUS_INTERNAL}/v1/status/ready", interval: 1s, start_period: 30s}
 
   redpanda-console:
     image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
@@ -42,7 +55,7 @@ services:
             - name: datagen
               url: http://connect:8083
     ports:
-      - "8080:8080"
+      - "${REDPANDA_CONSOLE_PORT_EXTERNAL}:${REDPANDA_CONSOLE_PORT_INTERNAL}"
     depends_on:
       - redpanda
 
@@ -52,8 +65,8 @@ services:
     command: -w2 --log-filter debug
     depends_on: [redpanda]
     ports:
-      - 6875:6875
-    healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
+      - "${MATERIALIZE_PORT_DB_EXTERNAL}:${MATERIALIZE_PORT_DB_INTERNAL}"
+    healthcheck: {test: "curl -f localhost:${MATERIALIZE_PORT_DB_INTERNAL}", interval: 1s, start_period: 30s}
     init: true
 
   materialized-cli:
@@ -70,7 +83,7 @@ services:
     container_name: postgres
     restart: always
     ports:
-      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+      - "${POSTGRES_PORT_EXTERNAL}:${POSTGRES_PORT_INTERNAL}"
     environment:
       PGDATA: /var/lib/postgresql/data
       POSTGRES_DB: ${POSTGRES_DATABASE}
@@ -78,6 +91,18 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./etc/postgres/pgdata:/var/lib/postgresql/data
+
+  adminer:
+    image: docker.io/library/adminer:4.8.1-standalone
+    container_name: adminer
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_DB_DRIVER: pgsql
+      ADMINER_DEFAULT_DB_HOST: postgres
+      ADMINER_DEFAULT_DB_NAME: adminer
+    ports:
+      - "${ADMINER_PORT_EXTERNAL}:${ADMINER_PORT_INTERNAL}"
 
   metabase:
     image: metabase/metabase:${METABASE_VERSION}
@@ -88,19 +113,19 @@ services:
     environment:
       MB_DB_TYPE: postgres
       MB_DB_HOST: postgres
-      MB_DB_PORT: ${POSTGRES_PORT}
+      MB_DB_PORT: ${POSTGRES_PORT_INTERNAL}
       MB_DB_DBNAME: ${POSTGRES_DATABASE}
       MB_DB_USER: ${POSTGRES_USERNAME}
       MB_DB_PASS: ${POSTGRES_PASSWORD}
     ports:
-      - 3000:3000
+      - ${METABASE_PORT_EXTERNAL}:${METABASE_PORT_INTERNAL}
 
   dbt:
     image: ghcr.io/dbt-labs/dbt-postgres:1.2.latest
     container_name: dbt
-    command: 
-      - bash 
-      - -c 
+    command:
+      - bash
+      - -c
       - |
         echo "Launching dbt"
         #
@@ -110,6 +135,6 @@ services:
       - ./etc/dbt/app/:/usr/app/
       - ./etc/dbt/profile/:/root/.dbt/
     ports:
-      - "8085:8085"
+      - "${DBT_PORT_EXTERNAL}:${DBT_PORT_INTERNAL}"
     environment:
       - TZ=Etc/GMT

@@ -1,4 +1,4 @@
 #!/bin/bash
 terraform init &&\
 terraform plan &&\
-TF_LOG=debug terraform apply --auto-approve
+TF_LOG=warn terraform apply --auto-approve

@@ -1,0 +1,30 @@
+/**
+  * https://marinecadastre.gov/ais/
+  *
+  * MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,VesselName,IMO,CallSign,VesselType,Status,Length,Width,Draft,Cargo,TransceiverClass
+  * 367702220,2022-03-31T00:00:01,29.78763,-95.08070,0.1,226.5,340.0,JOE B WARD,,WDI4808,31,12,21,8,,57,A
+  * 671226100,2022-03-31T00:00:01,25.77626,-80.20320,3.2,143.7,511.0,RELIANCE II,IMO9221322,5VHS7,79,0,52,12,2.5,70,A
+  * 367767250,2022-03-31T00:00:01,29.31623,-94.78829,4.5,228.1,511.0,GLEN K,,WDJ3358,52,0,0,0,0.0,52,A
+ */
+
+protocol AisVesselData {
+	record AisVesselData {
+		int mssi;
+		time_ms baseDateTime;
+		double lat;
+		double long;
+		double SOG;
+		double COG;
+		double heading;
+		string vesselName;
+		string IMO;
+		string callSign;
+		int vesselType;
+		int status;
+		int length;
+		int width;
+		double draft;
+		int cargo;
+		string transceiverClass;
+	}
+}

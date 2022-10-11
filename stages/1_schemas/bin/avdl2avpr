@@ -1,0 +1,6 @@
+#!/bin/bash
+java \
+ -jar libs/avro-tools-1.10.0.jar \
+ idl \
+  avro/avdl/ais_vesseldata.avdl  \
+  avro/avpr/ais_vesseldata.avpr

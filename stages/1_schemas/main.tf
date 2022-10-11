@@ -7,6 +7,6 @@ provider "schemaregistry" {
 # avro/avpr/ais_vesseldata.avpr
 resource "schemaregistry_schema" "ais_vesseldata" {
     for_each = fileset("${path.module}/avro/avsc/", "**/*.avsc")
-    subject =substr(each.value, 0, length(each.value)-4)
+    subject =substr(each.value, 0, length(each.value)-5)
     schema  = file("${path.module}/avro/avsc/${each.value}")
 }

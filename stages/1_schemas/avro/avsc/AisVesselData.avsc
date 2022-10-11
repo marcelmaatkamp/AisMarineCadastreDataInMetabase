@@ -1,0 +1,9 @@
+{
+  "type" : "record",
+  "name" : "AisVesselData",
+  "namespace" : "gov.marinecadastre.ais",
+  "fields" : [ {
+    "name" : "mssi",
+    "type" : "int"
+  } ]
+}

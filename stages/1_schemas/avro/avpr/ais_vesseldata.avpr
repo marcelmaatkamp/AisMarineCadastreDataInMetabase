@@ -1,64 +1,12 @@
 {
   "protocol" : "AisVesselData",
   "namespace" : "gov.marinecadastre.ais",
-  "doc" : "* https://marinecadastre.gov/ais/\n  *\n  * MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,VesselName,IMO,CallSign,VesselType,Status,Length,Width,Draft,Cargo,TransceiverClass\n  * 367702220,2022-03-31T00:00:01,29.78763,-95.08070,0.1,226.5,340.0,JOE B WARD,,WDI4808,31,12,21,8,,57,A\n  * 671226100,2022-03-31T00:00:01,25.77626,-80.20320,3.2,143.7,511.0,RELIANCE II,IMO9221322,5VHS7,79,0,52,12,2.5,70,A\n  * 367767250,2022-03-31T00:00:01,29.31623,-94.78829,4.5,228.1,511.0,GLEN K,,WDJ3358,52,0,0,0,0.0,52,A",
   "types" : [ {
     "type" : "record",
     "name" : "AisVesselData",
     "fields" : [ {
       "name" : "mssi",
       "type" : "int"
-    }, {
-      "name" : "baseDateTime",
-      "type" : {
-        "type" : "int",
-        "logicalType" : "time-millis"
-      }
-    }, {
-      "name" : "lat",
-      "type" : "double"
-    }, {
-      "name" : "lon",
-      "type" : "double"
-    }, {
-      "name" : "SOG",
-      "type" : "double"
-    }, {
-      "name" : "COG",
-      "type" : "double"
-    }, {
-      "name" : "heading",
-      "type" : "double"
-    }, {
-      "name" : "vesselName",
-      "type" : "string"
-    }, {
-      "name" : "IMO",
-      "type" : "string"
-    }, {
-      "name" : "callSign",
-      "type" : "string"
-    }, {
-      "name" : "vesselType",
-      "type" : "int"
-    }, {
-      "name" : "status",
-      "type" : "int"
-    }, {
-      "name" : "length",
-      "type" : "int"
-    }, {
-      "name" : "width",
-      "type" : "int"
-    }, {
-      "name" : "draft",
-      "type" : "double"
-    }, {
-      "name" : "cargo",
-      "type" : "int"
-    }, {
-      "name" : "transceiverClass",
-      "type" : "string"
     } ]
   } ],
   "messages" : { }

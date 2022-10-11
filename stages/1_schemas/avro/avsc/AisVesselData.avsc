@@ -5,5 +5,56 @@
   "fields" : [ {
     "name" : "mssi",
     "type" : "int"
+  }, {
+    "name" : "baseDateTime",
+    "type" : {
+      "type" : "int",
+      "logicalType" : "time-millis"
+    }
+  }, {
+    "name" : "lat",
+    "type" : "double"
+  }, {
+    "name" : "lon",
+    "type" : "double"
+  }, {
+    "name" : "SOG",
+    "type" : "double"
+  }, {
+    "name" : "COG",
+    "type" : "double"
+  }, {
+    "name" : "heading",
+    "type" : "double"
+  }, {
+    "name" : "vesselName",
+    "type" : "string"
+  }, {
+    "name" : "IMO",
+    "type" : "string"
+  }, {
+    "name" : "callSign",
+    "type" : "string"
+  }, {
+    "name" : "vesselType",
+    "type" : "int"
+  }, {
+    "name" : "status",
+    "type" : "int"
+  }, {
+    "name" : "length",
+    "type" : "int"
+  }, {
+    "name" : "width",
+    "type" : "int"
+  }, {
+    "name" : "draft",
+    "type" : "double"
+  }, {
+    "name" : "cargo",
+    "type" : "int"
+  }, {
+    "name" : "transceiverClass",
+    "type" : "string"
   } ]
 }

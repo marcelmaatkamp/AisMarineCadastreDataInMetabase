@@ -10,17 +10,17 @@ services:
      - --reserve-memory 0M
      - --node-id 0
      - --check=false
-     - --kafka-addr 0.0.0.0:9092
-     - --advertise-kafka-addr redpanda:9092
-     - --pandaproxy-addr 0.0.0.0:8082
-     - --advertise-pandaproxy-addr redpanda:8082
+     - --kafka-addr 0.0.0.0:${REDPANDA_KAFKA_PORT}
+     - --advertise-kafka-addr redpanda:${REDPANDA_KAFKA_PORT}
+     - --pandaproxy-addr 0.0.0.0:${REDPANDA_PROXY_PORT}
+     - --advertise-pandaproxy-addr redpanda:${REDPANDA_PROXY_PORT}
      - --set redpanda.enable_transactions=true
      - --set redpanda.enable_idempotence=true
     ports:
-     - 8081:8081
-     - 8082:8082
-     - 9092:9092
-    healthcheck: {test: curl -f localhost:9644/v1/status/ready, interval: 1s, start_period: 30s}
+     - ${REDPANDA_SCHEMA_PORT}:${REDPANDA_SCHEMA_PORT}
+     - ${REDPANDA_PROXY_PORT}:${REDPANDA_PROXY_PORT}
+     - ${REDPANDA_KAFKA_PORT}:${REDPANDA_KAFKA_PORT}
+    healthcheck: {test: "curl -f localhost:${REDPANDA_ADMIN_PORT}/v1/status/ready", interval: 1s, start_period: 30s}
 
   redpanda-console:
     image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
@@ -28,28 +28,58 @@ services:
     restart: on-failure
     entrypoint: /bin/sh
     command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+    env_file:
+      - .env
     environment:
       CONFIG_FILEPATH: /tmp/config.yml
       CONSOLE_CONFIG_FILE: |
         kafka:
-          brokers: ["redpanda:9092"]
+          brokers: ["redpanda:${REDPANDA_KAFKA_PORT}"]
           schemaRegistry:
             enabled: true
-            urls: ["http://redpanda:8081"]
+            urls: ["http://redpanda:${REDPANDA_SCHEMA_PORT}"]
+        redpanda:
+          adminApi:
+            enabled: true
+            urls: ["http://redpanda:${REDPANDA_ADMIN_PORT}"]
         connect:
           enabled: true
           clusters:
-            - name: datagen
+            - name: local-connect-cluster
               url: http://connect:8083
     ports:
-      - "8080:8080"
+      - "${REDPANDA_CONSOLE_PORT_EXTERNAL}:${REDPANDA_CONSOLE_PORT_INTERNAL}"
     depends_on:
       - redpanda
+
+  connect:
+    image: docker.cloudsmith.io/redpanda/connectors/connectors:624ff9e
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - redpanda
+    ports:
+      - "8083:8083"
+    environment:
+      KAFKA_CONNECT_CONFIGURATION: |
+        offset.storage.topic=docker-connect-offsets
+        value.converter=org.apache.kafka.connect.json.JsonConverter
+        config.storage.topic=docker-connect-configs
+        key.converter=org.apache.kafka.connect.json.JsonConverter
+        group.id=compose-connect-group
+        status.storage.topic=docker-connect-status
+        config.storage.replication.factor=1
+        offset.storage.replication.factor=1
+        status.storage.replication.factor=1
+      KAFKA_CONNECT_METRICS_ENABLED: "false"
+      KAFKA_CONNECT_BOOTSTRAP_SERVERS: redpanda:9092
+      KAFKA_GC_LOG_ENABLED: "false"
+      KAFKA_HEAP_OPTS: -Xms128M
 
   materialized:
     image: materialize/materialized:${MATERIALIZE_VERSION}
     container_name: materialized
-    command: -w2 --log-filter debug
+    command: -w2 --log-filter debug --disable-telemetry
     depends_on: [redpanda]
     ports:
       - 6875:6875
@@ -59,11 +89,12 @@ services:
   materialized-cli:
     image: materialize/cli:${MATERIALIZE_VERSION}
     container_name: materialized-cli
-    command: -f /mnt/mz_views.sql
+    init: true
+    tty: true
+    stdin_open: true
     depends_on:
       materialized: { condition: service_healthy }
       redpanda: { condition: service_healthy }
-    volumes: [.:/mnt]
 
   postgres:
     image: postgres:14
@@ -96,18 +127,16 @@ services:
       - 3000:3000
 
   dbt:
-    image: ghcr.io/dbt-labs/dbt-postgres:1.2.latest
+    image: ghcr.io/dbt-labs/dbt-core:1.3.0 # https://github.com/dbt-labs/dbt-core/tree/main/docker
     container_name: dbt
-    command: 
-      - bash 
-      - -c 
-      - |
-        echo "Launching dbt"
-        #
-        sleep infinity
     restart: unless-stopped
+    stdin_open: true
+    tty: true
+    command: run
+    depends_on:
+      - materialized
     volumes:
-      - ./etc/dbt/app/:/usr/app/
+      - ./etc/dbt/app/dbt/example:/usr/app/
       - ./etc/dbt/profile/:/root/.dbt/
     ports:
       - "8085:8085"

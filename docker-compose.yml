@@ -62,7 +62,7 @@ services:
   materialized:
     image: materialize/materialized:${MATERIALIZE_VERSION}
     container_name: materialized
-    command: -w2 --log-filter debug
+    command: -w2 # --log-filter debug
     depends_on: [redpanda]
     ports:
       - "${MATERIALIZE_PORT_DB_EXTERNAL}:${MATERIALIZE_PORT_DB_INTERNAL}"
@@ -72,11 +72,12 @@ services:
   materialized-cli:
     image: materialize/cli:${MATERIALIZE_VERSION}
     container_name: materialized-cli
-    command: -f /mnt/mz_views.sql
+    init: true
+    tty: true
+    stdin_open: true
     depends_on:
       materialized: { condition: service_healthy }
       redpanda: { condition: service_healthy }
-    volumes: [.:/mnt]
 
   postgres:
     image: postgres:14

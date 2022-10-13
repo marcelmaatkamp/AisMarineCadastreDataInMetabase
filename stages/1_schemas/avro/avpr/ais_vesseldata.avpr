@@ -1,0 +1,13 @@
+{
+  "protocol" : "AisVesselData",
+  "namespace" : "gov.marinecadastre.ais",
+  "types" : [ {
+    "type" : "record",
+    "name" : "AisVesselData",
+    "fields" : [ {
+      "name" : "mssi",
+      "type" : "int"
+    } ]
+  } ],
+  "messages" : { }
+}

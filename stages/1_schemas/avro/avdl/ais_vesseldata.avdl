@@ -1,0 +1,22 @@
+@namespace("gov.marinecadastre.ais")
+protocol AisVesselData {
+	record AisVesselData {
+		int mssi;
+		time_ms baseDateTime;
+		double lat;
+		double lon;
+		double SOG;
+		double COG;
+		double heading;
+		string vesselName;
+		string IMO;
+		string callSign;
+		int vesselType;
+		int status;
+		int length;
+		int width;
+		double draft;
+		int cargo;
+		string transceiverClass;
+	}
+}

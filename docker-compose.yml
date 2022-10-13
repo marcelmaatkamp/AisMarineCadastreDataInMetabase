@@ -1,4 +1,15 @@
 services:
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    environment:
+      - "NGINX_PORT=${NGINX_PORT_INTERNAL}"
+    volumes:
+      - ./etc/nginx/html:/usr/share/nginx/html:ro
+    ports:
+      - "${NGINX_PORT_EXTERNAL}:${NGINX_PORT_INTERNAL}"
+
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:${REDPANDA_VERSION}
     container_name: redpanda
@@ -10,17 +21,19 @@ services:
      - --reserve-memory 0M
      - --node-id 0
      - --check=false
-     - --kafka-addr 0.0.0.0:${REDPANDA_KAFKA_PORT}
-     - --advertise-kafka-addr redpanda:${REDPANDA_KAFKA_PORT}
-     - --pandaproxy-addr 0.0.0.0:${REDPANDA_PROXY_PORT}
-     - --advertise-pandaproxy-addr redpanda:${REDPANDA_PROXY_PORT}
+     - --kafka-addr 0.0.0.0:${REDPANDA_PORT_KAFKA_INTERNAL}
+     - --advertise-kafka-addr redpanda:${REDPANDA_PORT_KAFKA_INTERNAL}
+     - --pandaproxy-addr 0.0.0.0:${REDPANDA_PORT_HTTP_INTERNAL}
+     - --advertise-pandaproxy-addr redpanda:${REDPANDA_PORT_HTTP_INTERNAL}
      - --set redpanda.enable_transactions=true
      - --set redpanda.enable_idempotence=true
     ports:
-     - ${REDPANDA_SCHEMA_PORT}:${REDPANDA_SCHEMA_PORT}
-     - ${REDPANDA_PROXY_PORT}:${REDPANDA_PROXY_PORT}
-     - ${REDPANDA_KAFKA_PORT}:${REDPANDA_KAFKA_PORT}
-    healthcheck: {test: "curl -f localhost:${REDPANDA_ADMIN_PORT}/v1/status/ready", interval: 1s, start_period: 30s}
+     - "${REDPANDA_PORT_SCHEMA_EXTERNAL}:${REDPANDA_PORT_SCHEMA_INTERNAL}"          # Schema Registry port
+     - "${REDPANDA_PORT_HTTP_EXTERNAL}:${REDPANDA_PORT_HTTP_INTERNAL}"              # HTTP Proxy port
+     - "${REDPANDA_PORT_KAFKA_EXTERNAL}:${REDPANDA_PORT_KAFKA_INTERNAL}"            # Kafka API port
+     - "${REDPANDA_PORT_PROMETHEUS_EXTERNAL}:${REDPANDA_PORT_PROMETHEUS_INTERNAL}"  #  Prometheus and HTTP admin port
+     - "${REDPANDA_PORT_GRPC_EXTERNAL}:${REDPANDA_PORT_GRPC_INTERNAL}"              # internal RPC port
+    healthcheck: {test: "curl -f localhost:${REDPANDA_PORT_PROMETHEUS_INTERNAL}/v1/status/ready", interval: 1s, start_period: 30s}
 
   redpanda-console:
     image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
@@ -28,25 +41,23 @@ services:
     restart: on-failure
     entrypoint: /bin/sh
     command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
-    env_file:
-      - .env
     environment:
       CONFIG_FILEPATH: /tmp/config.yml
       CONSOLE_CONFIG_FILE: |
         kafka:
-          brokers: ["redpanda:${REDPANDA_KAFKA_PORT}"]
+          brokers: ["redpanda:${REDPANDA_PORT_KAFKA_INTERNAL}"]
           schemaRegistry:
             enabled: true
-            urls: ["http://redpanda:${REDPANDA_SCHEMA_PORT}"]
-        redpanda:
-          adminApi:
-            enabled: true
-            urls: ["http://redpanda:${REDPANDA_ADMIN_PORT}"]
+            urls: ["http://redpanda:${REDPANDA_PORT_SCHEMA_INTERNAL}"]
         connect:
           enabled: true
           clusters:
             - name: local-connect-cluster
-              url: http://connect:8083
+              url: http://connect:${REDPANDA_PORT_CONNECT_INTERNAL}
+        redpanda:
+                  adminApi:
+                    enabled: true
+                    urls: ["http://redpanda:${REDPANDA_PORT_CONNECT_INTERNAL}
     ports:
       - "${REDPANDA_CONSOLE_PORT_EXTERNAL}:${REDPANDA_CONSOLE_PORT_INTERNAL}"
     depends_on:
@@ -57,33 +68,33 @@ services:
     hostname: connect
     container_name: connect
     depends_on:
-      - redpanda
+    - redpanda
     ports:
       - "8083:8083"
     environment:
       KAFKA_CONNECT_CONFIGURATION: |
-        offset.storage.topic=docker-connect-offsets
-        value.converter=org.apache.kafka.connect.json.JsonConverter
-        config.storage.topic=docker-connect-configs
-        key.converter=org.apache.kafka.connect.json.JsonConverter
-        group.id=compose-connect-group
-        status.storage.topic=docker-connect-status
-        config.storage.replication.factor=1
-        offset.storage.replication.factor=1
-        status.storage.replication.factor=1
+          offset.storage.topic=docker-connect-offsets
+          value.converter=org.apache.kafka.connect.json.JsonConverter
+          config.storage.topic=docker-connect-configs
+          key.converter=org.apache.kafka.connect.json.JsonConverter
+          group.id=compose-connect-group
+          status.storage.topic=docker-connect-status
+          config.storage.replication.factor=1
+          offset.storage.replication.factor=1
+          status.storage.replication.factor=1
       KAFKA_CONNECT_METRICS_ENABLED: "false"
       KAFKA_CONNECT_BOOTSTRAP_SERVERS: redpanda:9092
       KAFKA_GC_LOG_ENABLED: "false"
       KAFKA_HEAP_OPTS: -Xms128M
-
+      
   materialized:
     image: materialize/materialized:${MATERIALIZE_VERSION}
     container_name: materialized
-    command: -w2 --log-filter debug --disable-telemetry
+    command: -w2 --disable-telemetry # -log-filter debug
     depends_on: [redpanda]
     ports:
-      - 6875:6875
-    healthcheck: {test: curl -f localhost:6875, interval: 1s, start_period: 30s}
+      - "${MATERIALIZE_PORT_DB_EXTERNAL}:${MATERIALIZE_PORT_DB_INTERNAL}"
+    healthcheck: {test: "curl -f localhost:${MATERIALIZE_PORT_DB_INTERNAL}", interval: 1s, start_period: 30s}
     init: true
 
   materialized-cli:
@@ -95,13 +106,14 @@ services:
     depends_on:
       materialized: { condition: service_healthy }
       redpanda: { condition: service_healthy }
+    volumes: [.:/mnt]
 
   postgres:
     image: postgres:14
     container_name: postgres
     restart: always
     ports:
-      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+      - "${POSTGRES_PORT_EXTERNAL}:${POSTGRES_PORT_INTERNAL}"
     environment:
       PGDATA: /var/lib/postgresql/data
       POSTGRES_DB: ${POSTGRES_DATABASE}
@@ -110,6 +122,27 @@ services:
     volumes:
       - ./etc/postgres/pgdata:/var/lib/postgresql/data
 
+  sqlpad:
+    image: sqlpad/sqlpad:6
+    container_name: sqlpad
+    ports:
+      - "${SQLPAD_PORT_EXTERNAL}:${SQLPAD_PORT_INTERNAL}"
+    environment:
+      SQLPAD_ADMIN: "admin@sqlpad.com"
+      SQLPAD_ADMIN_PASSWORD: "admin"
+      SQLPAD_APP_LOG_LEVEL: debug
+      SQLPAD_WEB_LOG_LEVEL: warn
+      SQLPAD_SEED_DATA_PATH: /etc/sqlpad/seed-data
+      SQLPAD_CONNECTIONS__pgdemo__name: postgres
+      SQLPAD_CONNECTIONS__pgdemo__driver: postgres
+      SQLPAD_CONNECTIONS__pgdemo__host: postgres
+      SQLPAD_CONNECTIONS__pgdemo__database: ${POSTGRES_DATABASE}
+      SQLPAD_CONNECTIONS__pgdemo__username: ${POSTGRES_USERNAME}
+      SQLPAD_CONNECTIONS__pgdemo__password: ${POSTGRES_PASSWORD}
+      SQLPAD_CONNECTIONS__pgdemo__multiStatementTransactionEnabled: "true"
+      SQLPAD_CONNECTIONS__pgdemo__idleTimeoutSeconds: 86400
+    volumes:
+      - "./etc/sqlpad/seed-data:/etc/sqlpad/seed-data"
   metabase:
     image: metabase/metabase:${METABASE_VERSION}
     container_name: metabase
@@ -119,12 +152,12 @@ services:
     environment:
       MB_DB_TYPE: postgres
       MB_DB_HOST: postgres
-      MB_DB_PORT: ${POSTGRES_PORT}
+      MB_DB_PORT: ${POSTGRES_PORT_INTERNAL}
       MB_DB_DBNAME: ${POSTGRES_DATABASE}
       MB_DB_USER: ${POSTGRES_USERNAME}
       MB_DB_PASS: ${POSTGRES_PASSWORD}
     ports:
-      - 3000:3000
+      - ${METABASE_PORT_EXTERNAL}:${METABASE_PORT_INTERNAL}
 
   dbt:
     image: ghcr.io/dbt-labs/dbt-core:1.3.0 # https://github.com/dbt-labs/dbt-core/tree/main/docker
@@ -139,6 +172,6 @@ services:
       - ./etc/dbt/app/dbt/example:/usr/app/
       - ./etc/dbt/profile/:/root/.dbt/
     ports:
-      - "8085:8085"
+      - "${DBT_PORT_EXTERNAL}:${DBT_PORT_INTERNAL}"
     environment:
       - TZ=Etc/GMT

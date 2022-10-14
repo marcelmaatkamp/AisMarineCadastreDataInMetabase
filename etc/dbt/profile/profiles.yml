@@ -1,3 +1,4 @@
+# see https://github.com/MaterializeInc/materialize/blob/main/misc/dbt-materialize/dbt/include/materialize/sample_profiles.yml
 example:
   outputs:
     prod:
@@ -23,5 +24,4 @@ example:
       schema: public
       cluster: default
       sslmode: require
-
-    target: dev
+  target: dev

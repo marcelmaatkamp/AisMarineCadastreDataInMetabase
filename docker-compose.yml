@@ -168,7 +168,7 @@ services:
     restart: unless-stopped
     stdin_open: true
     tty: true
-    command: dbt run --profiles-dir /root/.dbt --project-dir /usr/app --no-anonymous-usage-stats
+    command: dbt run --profiles-dir /root/.dbt --project-dir /usr/app
     depends_on:
       - materialized
     volumes:

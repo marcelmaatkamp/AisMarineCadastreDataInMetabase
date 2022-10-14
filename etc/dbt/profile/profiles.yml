@@ -23,5 +23,5 @@ example:
       database: materialize
       schema: public
       cluster: default
-      sslmode: require
+      # sslmode: require
   target: dev

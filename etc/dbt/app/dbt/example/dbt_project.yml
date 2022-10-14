@@ -25,8 +25,8 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "dbt_packages"
 
 vars:
-  redpanda_broker: 'redpanda:9092'
-
+  kafka_broker: 'redpanda:9092'
+  kafka_schema_registry: 'redpanda:8081'
 
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models

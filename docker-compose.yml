@@ -37,7 +37,6 @@ services:
 
   redpanda-console:
     image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
-    container_name: redpanda-console
     restart: on-failure
     entrypoint: /bin/sh
     command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
@@ -52,12 +51,8 @@ services:
         connect:
           enabled: true
           clusters:
-            - name: local-connect-cluster
+            - name: datagen
               url: http://connect:${REDPANDA_PORT_CONNECT_INTERNAL}
-        redpanda:
-          enabled: true
-          adminApi:
-            urls: ["http://redpanda:${REDPANDA_PORT_CONNECT_INTERNAL}
     ports:
       - "${REDPANDA_CONSOLE_PORT_EXTERNAL}:${REDPANDA_CONSOLE_PORT_INTERNAL}"
     depends_on:
@@ -161,7 +156,7 @@ services:
       - ${METABASE_PORT_EXTERNAL}:${METABASE_PORT_INTERNAL}
 
   dbt:
-    image: materialize/dbt-materialize:v0.27.0
+    image: materialize/dbt-materialize:latest
           # ghcr.io/dbt-labs/dbt-core:1.3.latest
           # https://github.com/dbt-labs/dbt-core/tree/main/docker
     container_name: dbt

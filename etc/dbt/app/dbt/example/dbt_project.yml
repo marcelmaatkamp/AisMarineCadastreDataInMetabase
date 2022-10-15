@@ -41,9 +41,3 @@ models:
     sources:
       +materialized: sources
       +schema: sources
-      staging:
-        +schema: staging
-        +materialized: view
-      marts:
-        +schema: marts
-        +materialized: materializedview

@@ -163,7 +163,7 @@ services:
     restart: "no"
     stdin_open: true
     tty: true
-    command: dbt run --profiles-dir /root/.dbt --project-dir /usr/app
+    command: bash -c 'dbt run --project-dir=/usr/app; dbt docs generate --project-dir=/usr/app; dbt docs serve --project-dir=/usr/app'
     depends_on:
       - materialized
     volumes:
@@ -172,4 +172,6 @@ services:
     ports:
       - "${DBT_PORT_EXTERNAL}:${DBT_PORT_INTERNAL}"
     environment:
-      - TZ=Etc/GMT
+      DBT_PROFILES_DIR: /root/.dbt
+      DBT_PROJECT_DIR: /root/.dbt
+      TZ: Etc/GMT+1

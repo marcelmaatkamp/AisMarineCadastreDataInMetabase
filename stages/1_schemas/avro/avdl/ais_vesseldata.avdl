@@ -1,22 +1,58 @@
+/**  An example protocol in Avro IDL */
 @namespace("gov.marinecadastre.ais")
 protocol AisVesselData {
+
+	/** Ais Vessel Data */
 	record AisVesselData {
-		int mssi;
+		/**  Maritime Mobile Service Identity (MMSI) */
+		int mmsi;
+
+		/** Observation date */
 		time_ms baseDateTime;
+
+		/** Latitude */
 		double lat;
+
+		/** Longitude */
 		double lon;
+
+		/** Speed over ground (SOG) */
 		double SOG;
+
+		/**  course over ground (COG) */
 		double COG;
+
+		/** Heading */
 		double heading;
+
+		/** Name of the vessel  */
 		string vesselName;
+
+		/** IMO vessel number */
 		string IMO;
+
+		/** Callsign */
 		string callSign;
+
+		/** Type of vessel */
 		int vesselType;
+
+		/** Status */
 		int status;
+
+		/** Length */
 		int length;
+
+		/** Width */
 		int width;
+
+		/** Draft */
 		double draft;
+
+		/** Cargo */
 		int cargo;
+
+		/** Transceiver Class */
 		string transceiverClass;
 	}
 }

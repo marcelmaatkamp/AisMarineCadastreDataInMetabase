@@ -2,59 +2,77 @@
   "type" : "record",
   "name" : "AisVesselData",
   "namespace" : "gov.marinecadastre.ais",
+  "doc" : "Ais Vessel Data",
   "fields" : [ {
-    "name" : "mssi",
-    "type" : "int"
+    "name" : "mmsi",
+    "type" : "int",
+    "doc" : "Maritime Mobile Service Identity (MMSI)"
   }, {
     "name" : "baseDateTime",
     "type" : {
       "type" : "int",
       "logicalType" : "time-millis"
-    }
+    },
+    "doc" : "Observation date"
   }, {
     "name" : "lat",
-    "type" : "double"
+    "type" : "double",
+    "doc" : "Latitude"
   }, {
     "name" : "lon",
-    "type" : "double"
+    "type" : "double",
+    "doc" : "Longitude"
   }, {
     "name" : "SOG",
-    "type" : "double"
+    "type" : "double",
+    "doc" : "Speed over ground (SOG)"
   }, {
     "name" : "COG",
-    "type" : "double"
+    "type" : "double",
+    "doc" : "course over ground (COG)"
   }, {
     "name" : "heading",
-    "type" : "double"
+    "type" : "double",
+    "doc" : "Heading"
   }, {
     "name" : "vesselName",
-    "type" : "string"
+    "type" : "string",
+    "doc" : "Name of the vessel"
   }, {
     "name" : "IMO",
-    "type" : "string"
+    "type" : "string",
+    "doc" : "IMO vessel number"
   }, {
     "name" : "callSign",
-    "type" : "string"
+    "type" : "string",
+    "doc" : "Callsign"
   }, {
     "name" : "vesselType",
-    "type" : "int"
+    "type" : "int",
+    "doc" : "Type of vessel"
   }, {
     "name" : "status",
-    "type" : "int"
+    "type" : "int",
+    "doc" : "Status"
   }, {
     "name" : "length",
-    "type" : "int"
+    "type" : "int",
+    "doc" : "Length"
   }, {
     "name" : "width",
-    "type" : "int"
+    "type" : "int",
+    "doc" : "Width"
   }, {
     "name" : "draft",
-    "type" : "double"
+    "type" : "double",
+    "doc" : "Draft"
   }, {
     "name" : "cargo",
-    "type" : "int"
+    "type" : "int",
+    "doc" : "Cargo"
   }, {
     "name" : "transceiverClass",
-    "type" : "string"
+    "type" : "string",
+    "doc" : "Transceiver Class"
   } ]
 }

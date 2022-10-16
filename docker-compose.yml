@@ -119,6 +119,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./etc/postgres/pgdata:/var/lib/postgresql/data
+    healthcheck: { test: "pg_isready", interval: 1s, start_period: 30s }
 
   sqlpad:
     image: sqlpad/sqlpad:6
@@ -141,11 +142,30 @@ services:
       SQLPAD_CONNECTIONS__pgdemo__idleTimeoutSeconds: 86400
     volumes:
       - "./etc/sqlpad/seed-data:/etc/sqlpad/seed-data"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+# https://github.com/osixia/docker-openldap/blob/master/example/docker-compose.yml
+  openldap:
+    image: bitnami/openldap:2.4.57
+    hostname: openldap
+    container_name: openldap
+    ports:
+      - 1389:1389
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_USERS=user01@metabase.com,user02@metabase.com
+      - LDAP_PASSWORDS=password1!,password2!
+      - LDAP_PORT_NUMBER=1389
+      - LDAP_ROOT=dc=example,dc=org
+      - LDAP_USER_DC=users
+      - LDAP_GROUP=readers
+    # healthcheck: {test: " ldapsearch -H ldap://127.0.0.1:1389 -D dc=example,dc=com -w GoodNewsEveryone -b cn=admin,dc=planetexpress,dc=com", interval: 1s, start_period: 30s}
 
   metabase:
     image: metabase/metabase:${METABASE_VERSION}
     container_name: metabase
-    depends_on: [materialized]
     volumes:
       - "./etc/metabase/data:/metabase-data"
     environment:
@@ -155,8 +175,22 @@ services:
       MB_DB_DBNAME: ${POSTGRES_DATABASE}
       MB_DB_USER: ${POSTGRES_USERNAME}
       MB_DB_PASS: ${POSTGRES_PASSWORD}
+      MB_LDAP_ENABLED: true
+      MB_LDAP_BIND_DN: cn=admin,dc=example,dc=org
+      MB_LDAP_GROUP_BASE: cn=readers
+      MB_LDAP_HOST: openldap
+      MB_LDAP_PASSWORD: adminpassword
+      MB_LDAP_PORT: 1389
+      MB_LDAP_USER_BASE: ou=users,dc=example,dc=org
+      MB_LDAP_ATTRIBUTE_EMAIL: uid
+      MB_LDAP_ATTRIBUTE_FIRSTNAME: uid
+      MB_LDAP_ATTRIBUTE_LASTNAME: sn
     ports:
       - ${METABASE_PORT_EXTERNAL}:${METABASE_PORT_INTERNAL}
+    depends_on:
+      materialized: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+      openldap: { condition: service_healthy }
 
   # v0.26.5: dbt:1.0.4
   # v0.27.0: dbt:1.2.1

@@ -158,11 +158,11 @@ services:
     ports:
       - ${METABASE_PORT_EXTERNAL}:${METABASE_PORT_INTERNAL}
 
-  # v0.26.5: dbt:
+  # v0.26.5: dbt:1.0.4
   # v0.27.0: dbt:1.2.1
   # latest, db:1.2.1
   dbt:
-    image: materialize/dbt-materialize:latest
+    image: materialize/dbt-materialize:v0.27.0
           # ghcr.io/dbt-labs/dbt-core:1.3.latest
           # https://github.com/dbt-labs/dbt-core/tree/main/docker
     container_name: dbt

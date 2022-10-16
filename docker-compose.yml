@@ -190,8 +190,7 @@ services:
     depends_on:
       materialized: { condition: service_healthy }
       postgres: { condition: service_healthy }
-      openldap: { condition: service_healthy }
-
+      # openldap: { condition: }
   # v0.26.5: dbt:1.0.4
   # v0.27.0: dbt:1.2.1
   # latest, db:1.2.1

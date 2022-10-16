@@ -7,8 +7,10 @@ services:
       - "NGINX_PORT=${NGINX_PORT_INTERNAL}"
     volumes:
       - ./etc/nginx/html:/usr/share/nginx/html:ro
+
     ports:
       - "${NGINX_PORT_EXTERNAL}:${NGINX_PORT_INTERNAL}"
+    healthcheck: {test: "curl -f localhost:${NGINX_PORT_INTERNAL}", interval: 1s, start_period: 30s}
 
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:${REDPANDA_VERSION}
@@ -37,6 +39,7 @@ services:
 
   redpanda-console:
     image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
+    container_name: redpanda-console
     restart: on-failure
     entrypoint: /bin/sh
     command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
@@ -55,6 +58,7 @@ services:
               url: http://connect:${REDPANDA_PORT_CONNECT_INTERNAL}
     ports:
       - "${REDPANDA_CONSOLE_PORT_EXTERNAL}:${REDPANDA_CONSOLE_PORT_INTERNAL}"
+    healthcheck: { test: "curl -f localhost:${REDPANDA_CONSOLE_PORT_INTERNAL}", interval: 1s, start_period: 30s }
     depends_on:
       - redpanda
 

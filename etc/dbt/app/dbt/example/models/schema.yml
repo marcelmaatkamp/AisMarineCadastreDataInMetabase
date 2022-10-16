@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: aisVesselData
+    # description: One record per cutomer with fields from orders
+    description: "8978978978978"
+    columns:
+      - name: mmsi
+        description:  primay key of the model
+        tests:
+          - unique
+          - not_null

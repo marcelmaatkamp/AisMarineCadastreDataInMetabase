@@ -38,6 +38,3 @@ models:
     # Config indicated by + and applies to all files under models/example/
   example:
     +materialized: view
-    sources:
-      +materialized: sources
-      +schema: sources

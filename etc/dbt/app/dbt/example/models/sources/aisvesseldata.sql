@@ -1,5 +1,4 @@
 {{ config(materialized='source') }}
-
 CREATE SOURCE {{ this }}
 FROM KAFKA BROKER {{ "'" ~ var('kafka_broker') ~ "'" }}
 TOPIC 'AisVesselData'

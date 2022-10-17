@@ -1,43 +1,115 @@
-/.idea/
-/terraform/metabase/.terraform.lock.hcl
-/terraform/metabase/.terraform/
 
+.apt_generated/
+.apt_generated_test/
+# are not checked in
+atlassian-ide-plugin.xml
+.autotools
+*.bak
+bin/
+buildNumber.properties
+.buildpath
+.cache-main
+*.class
+cmake-build-*/
+com_crashlytics_export_strings.xml
+# control as they are data points which are potentially sensitive and subject
+.cproject
+crash.*.log
+crash.log
+# Crash log files
+crashlytics-build.properties
+crashlytics.properties
+*.ctxt
+dependency-reduced-pom.xml
+*.ear
 etc/metabase/data
 etc/postgres/pgdata/
-
-# Local .terraform directories
-**/.terraform/*
-
-# .tfstate files
-*.tfstate
-*.tfstate.*
-
-# Crash log files
-crash.log
-crash.*.log
-
-# Exclude all .tfvars files, which are likely to contain sensitive data, such as
-# password, private keys, and other secrets. These should not be part of version
-# control as they are data points which are potentially sensitive and subject
-# to change depending on the environment.
-*.tfvars
-*.tfvars.json
-
-# Ignore override files as they are usually used to override resources locally and so
-# are not checked in
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-
-# Include override files you do wish to add to version control using negated pattern
 # !example_override.tf
-
-# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
-
+# Exclude all .tfvars files, which are likely to contain sensitive data, such as
+.externalToolBuilders/
+fabric.properties
+.factorypath
+hs_err_pid*
+/.idea/
+.idea/caches/build_file_checksums.ser
+.idea/**/contentModel.xml
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/dbnavigator.xml
+.idea/**/dictionaries
+.idea/**/dynamic.xml
+.idea/**/gradle.xml
+.idea/httpRequests
+.idea/**/libraries
+.idea_modules/
+.idea/**/mongoSettings.xml
+.idea/replstate.xml
+.idea/**/shelf
+.idea/**/sqlDataSources.xml
+.idea/**/tasks.xml
+.idea/**/uiDesigner.xml
+.idea/**/usage.statistics.xml
+.idea/**/workspace.xml
 # Ignore CLI configuration files
+# Ignore override files as they are usually used to override resources locally and so
+# Include override files you do wish to add to version control using negated pattern
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+*.iws
+*.jar
+*.launch
+.loadpath
+local.properties
+# Local .terraform directories
+*.log
+.metadata
+.mtj.tmp/
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+*.nar
+*~.nib
+out/
+*_override.tf
+override.tf
+*_override.tf.json
+override.tf.json
+# password, private keys, and other secrets. These should not be part of version
+pom.xml.next
+pom.xml.releaseBackup
+pom.xml.tag
+pom.xml.versionsBackup
+*.pydevproject
+*.rar
+.recommenders
+.recommenders/
+release.properties
+.scala_dependencies
+.settings/
+.springBeans
+*.swp
+.target
+target/
+*.tar.gz
+.tern-project
+**/.terraform/*
+/terraform/metabase/.terraform/
+/terraform/metabase/.terraform.lock.hcl
 .terraformrc
 terraform.rc
-.user.yml
 terraform.tfstate*
+.texlipse
+*.tfstate
+*.tfstate.*
+# .tfstate files
+*.tfvars
+*.tfvars.json
+*.tmp
+tmp/
+# to change depending on the environment.
+.user.yml
+*.war
+.worksheet
+*.zip
+.idea/
+*.iml

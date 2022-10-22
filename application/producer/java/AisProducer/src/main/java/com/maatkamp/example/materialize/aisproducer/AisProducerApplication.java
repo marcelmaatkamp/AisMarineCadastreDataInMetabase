@@ -11,6 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
@@ -36,7 +37,7 @@ public class AisProducerApplication {
             // Width,Draft,Cargo,TransceiverClass
             aisVesselData = AisVesselData.newBuilder().
                     setMmsi(getIntValue(nextLine[0])).
-                    setBaseDateTime(LocalTime.parse(nextLine[1], formatter)).
+                    setBaseDateTime(LocalDateTime.parse(nextLine[1], formatter)).
                     setLat(getDoubleValue(nextLine[2])).
                     setLon(getDoubleValue(nextLine[3])).
                     setSOG(getDoubleValue(nextLine[4])).

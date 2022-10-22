@@ -10,7 +10,7 @@ protocol AisVesselData {
 		union { null, int }  mmsi = null;
 
 		/** Observation date */
-		union {  null, time_ms } baseDateTime = null;
+		union {  null, timestamp_ms  } baseDateTime = null;
 
 		/** Latitude */
 		union {  null, double } lat = null;

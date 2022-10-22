@@ -15,13 +15,13 @@ import org.apache.avro.message.SchemaStore;
 /** Ais Vessel Data */
 @org.apache.avro.specific.AvroGenerated
 public class AisVesselData extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = 5739072513059003783L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AisVesselData\",\"namespace\":\"gov.marinecadastre.ais\",\"doc\":\"Ais Vessel Data\",\"fields\":[{\"name\":\"mmsi\",\"type\":[\"null\",\"int\"],\"doc\":\"Maritime Mobile Service Identity (MMSI)\",\"default\":null},{\"name\":\"baseDateTime\",\"type\":[\"null\",{\"type\":\"int\",\"logicalType\":\"time-millis\"}],\"doc\":\"Observation date\",\"default\":null},{\"name\":\"lat\",\"type\":[\"null\",\"double\"],\"doc\":\"Latitude\",\"default\":null},{\"name\":\"lon\",\"type\":[\"null\",\"double\"],\"doc\":\"Longitude\",\"default\":null},{\"name\":\"SOG\",\"type\":[\"null\",\"double\"],\"doc\":\"Speed over ground (SOG)\",\"default\":null},{\"name\":\"COG\",\"type\":[\"null\",\"double\"],\"doc\":\"course over ground (COG)\",\"default\":null},{\"name\":\"heading\",\"type\":[\"null\",\"double\"],\"doc\":\"Heading\",\"default\":null},{\"name\":\"vesselName\",\"type\":[\"null\",\"string\"],\"doc\":\"Name of the vessel\",\"default\":null},{\"name\":\"IMO\",\"type\":[\"null\",\"string\"],\"doc\":\"IMO vessel number\",\"default\":null},{\"name\":\"callSign\",\"type\":[\"null\",\"string\"],\"doc\":\"Callsign\",\"default\":null},{\"name\":\"vesselType\",\"type\":[\"null\",\"int\"],\"doc\":\"Type of vessel\",\"default\":null},{\"name\":\"status\",\"type\":[\"null\",\"int\"],\"doc\":\"Status\",\"default\":null},{\"name\":\"length\",\"type\":[\"null\",\"int\"],\"doc\":\"Length\",\"default\":null},{\"name\":\"width\",\"type\":[\"null\",\"int\"],\"doc\":\"Width\",\"default\":null},{\"name\":\"draft\",\"type\":[\"null\",\"double\"],\"doc\":\"Draft\",\"default\":null},{\"name\":\"cargo\",\"type\":[\"null\",\"int\"],\"doc\":\"Cargo\",\"default\":null},{\"name\":\"transceiverClass\",\"type\":[\"null\",\"string\"],\"doc\":\"Transceiver Class\",\"default\":null}]}");
+  private static final long serialVersionUID = 1740800909733255699L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AisVesselData\",\"namespace\":\"gov.marinecadastre.ais\",\"doc\":\"Ais Vessel Data\",\"fields\":[{\"name\":\"mmsi\",\"type\":[\"null\",\"int\"],\"doc\":\"Maritime Mobile Service Identity (MMSI)\",\"default\":null},{\"name\":\"baseDateTime\",\"type\":[\"null\",{\"type\":\"long\",\"logicalType\":\"timestamp-millis\"}],\"doc\":\"Observation date\",\"default\":null},{\"name\":\"lat\",\"type\":[\"null\",\"double\"],\"doc\":\"Latitude\",\"default\":null},{\"name\":\"lon\",\"type\":[\"null\",\"double\"],\"doc\":\"Longitude\",\"default\":null},{\"name\":\"SOG\",\"type\":[\"null\",\"double\"],\"doc\":\"Speed over ground (SOG)\",\"default\":null},{\"name\":\"COG\",\"type\":[\"null\",\"double\"],\"doc\":\"course over ground (COG)\",\"default\":null},{\"name\":\"heading\",\"type\":[\"null\",\"double\"],\"doc\":\"Heading\",\"default\":null},{\"name\":\"vesselName\",\"type\":[\"null\",\"string\"],\"doc\":\"Name of the vessel\",\"default\":null},{\"name\":\"IMO\",\"type\":[\"null\",\"string\"],\"doc\":\"IMO vessel number\",\"default\":null},{\"name\":\"callSign\",\"type\":[\"null\",\"string\"],\"doc\":\"Callsign\",\"default\":null},{\"name\":\"vesselType\",\"type\":[\"null\",\"int\"],\"doc\":\"Type of vessel\",\"default\":null},{\"name\":\"status\",\"type\":[\"null\",\"int\"],\"doc\":\"Status\",\"default\":null},{\"name\":\"length\",\"type\":[\"null\",\"int\"],\"doc\":\"Length\",\"default\":null},{\"name\":\"width\",\"type\":[\"null\",\"int\"],\"doc\":\"Width\",\"default\":null},{\"name\":\"draft\",\"type\":[\"null\",\"double\"],\"doc\":\"Draft\",\"default\":null},{\"name\":\"cargo\",\"type\":[\"null\",\"int\"],\"doc\":\"Cargo\",\"default\":null},{\"name\":\"transceiverClass\",\"type\":[\"null\",\"string\"],\"doc\":\"Transceiver Class\",\"default\":null}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
 static {
-    MODEL$.addLogicalTypeConversion(new org.apache.avro.data.TimeConversions.TimeMillisConversion());
+    MODEL$.addLogicalTypeConversion(new org.apache.avro.data.TimeConversions.TimestampMillisConversion());
   }
 
   private static final BinaryMessageEncoder<AisVesselData> ENCODER =
@@ -78,7 +78,7 @@ static {
   /** Maritime Mobile Service Identity (MMSI) */
    private java.lang.Integer mmsi;
   /** Observation date */
-   private java.time.LocalTime baseDateTime;
+   private java.time.Instant baseDateTime;
   /** Latitude */
    private java.lang.Double lat;
   /** Longitude */
@@ -137,7 +137,7 @@ static {
    * @param cargo Cargo
    * @param transceiverClass Transceiver Class
    */
-  public AisVesselData(java.lang.Integer mmsi, java.time.LocalTime baseDateTime, java.lang.Double lat, java.lang.Double lon, java.lang.Double SOG, java.lang.Double COG, java.lang.Double heading, java.lang.CharSequence vesselName, java.lang.CharSequence IMO, java.lang.CharSequence callSign, java.lang.Integer vesselType, java.lang.Integer status, java.lang.Integer length, java.lang.Integer width, java.lang.Double draft, java.lang.Integer cargo, java.lang.CharSequence transceiverClass) {
+  public AisVesselData(java.lang.Integer mmsi, java.time.Instant baseDateTime, java.lang.Double lat, java.lang.Double lon, java.lang.Double SOG, java.lang.Double COG, java.lang.Double heading, java.lang.CharSequence vesselName, java.lang.CharSequence IMO, java.lang.CharSequence callSign, java.lang.Integer vesselType, java.lang.Integer status, java.lang.Integer length, java.lang.Integer width, java.lang.Double draft, java.lang.Integer cargo, java.lang.CharSequence transceiverClass) {
     this.mmsi = mmsi;
     this.baseDateTime = baseDateTime;
     this.lat = lat;
@@ -188,7 +188,7 @@ static {
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
     case 0: mmsi = (java.lang.Integer)value$; break;
-    case 1: baseDateTime = (java.time.LocalTime)value$; break;
+    case 1: baseDateTime = (java.time.Instant)value$; break;
     case 2: lat = (java.lang.Double)value$; break;
     case 3: lon = (java.lang.Double)value$; break;
     case 4: SOG = (java.lang.Double)value$; break;
@@ -230,7 +230,7 @@ static {
    * Gets the value of the 'baseDateTime' field.
    * @return Observation date
    */
-  public java.time.LocalTime getBaseDateTime() {
+  public java.time.Instant getBaseDateTime() {
     return baseDateTime;
   }
 
@@ -240,7 +240,7 @@ static {
    * Observation date
    * @param value the value to set.
    */
-  public void setBaseDateTime(java.time.LocalTime value) {
+  public void setBaseDateTime(java.time.Instant value) {
     this.baseDateTime = value;
   }
 
@@ -558,7 +558,7 @@ static {
     /** Maritime Mobile Service Identity (MMSI) */
     private java.lang.Integer mmsi;
     /** Observation date */
-    private java.time.LocalTime baseDateTime;
+    private java.time.Instant baseDateTime;
     /** Latitude */
     private java.lang.Double lat;
     /** Longitude */
@@ -796,7 +796,7 @@ static {
       * Observation date
       * @return The value.
       */
-    public java.time.LocalTime getBaseDateTime() {
+    public java.time.Instant getBaseDateTime() {
       return baseDateTime;
     }
 
@@ -807,7 +807,7 @@ static {
       * @param value The value of 'baseDateTime'.
       * @return This builder.
       */
-    public gov.marinecadastre.ais.AisVesselData.Builder setBaseDateTime(java.time.LocalTime value) {
+    public gov.marinecadastre.ais.AisVesselData.Builder setBaseDateTime(java.time.Instant value) {
       validate(fields()[1], value);
       this.baseDateTime = value;
       fieldSetFlags()[1] = true;
@@ -1501,7 +1501,7 @@ static {
       try {
         AisVesselData record = new AisVesselData();
         record.mmsi = fieldSetFlags()[0] ? this.mmsi : (java.lang.Integer) defaultValue(fields()[0]);
-        record.baseDateTime = fieldSetFlags()[1] ? this.baseDateTime : (java.time.LocalTime) defaultValue(fields()[1]);
+        record.baseDateTime = fieldSetFlags()[1] ? this.baseDateTime : (java.time.Instant) defaultValue(fields()[1]);
         record.lat = fieldSetFlags()[2] ? this.lat : (java.lang.Double) defaultValue(fields()[2]);
         record.lon = fieldSetFlags()[3] ? this.lon : (java.lang.Double) defaultValue(fields()[3]);
         record.SOG = fieldSetFlags()[4] ? this.SOG : (java.lang.Double) defaultValue(fields()[4]);

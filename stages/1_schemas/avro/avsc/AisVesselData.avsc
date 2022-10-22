@@ -11,8 +11,8 @@
   }, {
     "name" : "baseDateTime",
     "type" : [ "null", {
-      "type" : "int",
-      "logicalType" : "time-millis"
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
     } ],
     "doc" : "Observation date",
     "default" : null

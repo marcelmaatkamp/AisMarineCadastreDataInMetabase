@@ -1,3 +1,4 @@
+version: '3.8'
 services:
 
   nginx:
@@ -7,14 +8,13 @@ services:
       - "NGINX_PORT=${NGINX_PORT_INTERNAL}"
     volumes:
       - ./etc/nginx/html:/usr/share/nginx/html:ro
-
     ports:
       - "${NGINX_PORT_EXTERNAL}:${NGINX_PORT_INTERNAL}"
     healthcheck: {test: "curl -f localhost:${NGINX_PORT_INTERNAL}", interval: 1s, start_period: 30s}
 
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:${REDPANDA_VERSION}
-    container_name: redpanda
+    container_name: ${REDPANDA_CONTAINER_NAME}
     command:
      - redpanda start
      - --overprovisioned
@@ -35,6 +35,8 @@ services:
      - "${REDPANDA_PORT_KAFKA_EXTERNAL}:${REDPANDA_PORT_KAFKA_INTERNAL}"            # Kafka API port
      - "${REDPANDA_PORT_PROMETHEUS_EXTERNAL}:${REDPANDA_PORT_PROMETHEUS_INTERNAL}"  #  Prometheus and HTTP admin port
      - "${REDPANDA_PORT_GRPC_EXTERNAL}:${REDPANDA_PORT_GRPC_INTERNAL}"              # internal RPC port
+    volumes:
+      - redpanda:/var/lib/redpanda/data
     healthcheck: {test: "curl -f localhost:${REDPANDA_PORT_PROMETHEUS_INTERNAL}/v1/status/ready", interval: 1s, start_period: 30s}
 
   redpanda-console:
@@ -87,14 +89,16 @@ services:
       KAFKA_HEAP_OPTS: -Xms128M
       
   materialized:
-    image: materialize/materialized:${MATERIALIZE_VERSION}
+    image: materialize/materialized:v0.28.5
     container_name: materialized
-    command: -w2 --disable-telemetry # -log-filter debug
     depends_on: [redpanda]
+    restart: unless-stopped
+    environment:
+      # TODO: minio
+      MZ_PERSIST_BLOB_URL: file:///tmp/blob.blob
     ports:
       - "${MATERIALIZE_PORT_DB_EXTERNAL}:${MATERIALIZE_PORT_DB_INTERNAL}"
-    healthcheck: {test: "curl -f localhost:${MATERIALIZE_PORT_DB_INTERNAL}", interval: 1s, start_period: 30s}
-    init: true
+    healthcheck: {test: "curl -f localhost:${MATERIALIZE_PORT_DB_INTERNAL}", interval: 5s, start_period: 30s}
 
   materialized-cli:
     image: materialize/cli:${MATERIALIZE_VERSION}
@@ -106,20 +110,20 @@ services:
       materialized: { condition: service_healthy }
       redpanda: { condition: service_healthy }
 
-  postgres:
-    image: postgres:14
-    container_name: postgres
+  metabase-postgres:
+    image: postgres:${POSTGRES_METABASE_VERSION}
+    container_name: ${POSTGRES_METABASE_CONTAINER_NAME}
     restart: always
     ports:
-      - "${POSTGRES_PORT_EXTERNAL}:${POSTGRES_PORT_INTERNAL}"
+      - "${POSTGRES_METABASE_PORT_EXTERNAL}:${POSTGRES_METABASE_PORT_INTERNAL}"
     environment:
       PGDATA: /var/lib/postgresql/data
-      POSTGRES_DB: ${POSTGRES_DATABASE}
-      POSTGRES_USER: ${POSTGRES_USERNAME}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_METABASE_DATABASE}
+      POSTGRES_USER: ${POSTGRES_METABASE_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_METABASE_PASSWORD}
     volumes:
-      - ./etc/postgres/pgdata:/var/lib/postgresql/data
-    healthcheck: { test: "pg_isready", interval: 1s, start_period: 30s }
+      - metabase-postgres:/var/lib/postgresql/data
+    healthcheck: { test: "pg_isready", interval: 5s, start_period: 30s }
 
   sqlpad:
     image: sqlpad/sqlpad:6
@@ -132,18 +136,18 @@ services:
       SQLPAD_APP_LOG_LEVEL: debug
       SQLPAD_WEB_LOG_LEVEL: warn
       SQLPAD_SEED_DATA_PATH: /etc/sqlpad/seed-data
-      SQLPAD_CONNECTIONS__pgdemo__name: postgres
+      SQLPAD_CONNECTIONS__pgdemo__name: metabase
       SQLPAD_CONNECTIONS__pgdemo__driver: postgres
-      SQLPAD_CONNECTIONS__pgdemo__host: postgres
-      SQLPAD_CONNECTIONS__pgdemo__database: ${POSTGRES_DATABASE}
-      SQLPAD_CONNECTIONS__pgdemo__username: ${POSTGRES_USERNAME}
-      SQLPAD_CONNECTIONS__pgdemo__password: ${POSTGRES_PASSWORD}
+      SQLPAD_CONNECTIONS__pgdemo__host: ${POSTGRES_METABASE_CONTAINER_NAME}
+      SQLPAD_CONNECTIONS__pgdemo__database: ${POSTGRES_METABASE_DATABASE}
+      SQLPAD_CONNECTIONS__pgdemo__username: ${POSTGRES_METABASE_USERNAME}
+      SQLPAD_CONNECTIONS__pgdemo__password: ${POSTGRES_METABASE_PASSWORD}
       SQLPAD_CONNECTIONS__pgdemo__multiStatementTransactionEnabled: "true"
       SQLPAD_CONNECTIONS__pgdemo__idleTimeoutSeconds: 86400
     volumes:
-      - "./etc/sqlpad/seed-data:/etc/sqlpad/seed-data"
+      - sqlpad:/etc/sqlpad/seed-data
     depends_on:
-      postgres: { condition: service_healthy }
+      metabase-postgres: { condition: service_healthy }
 
 # https://github.com/osixia/docker-openldap/blob/master/example/docker-compose.yml
   openldap:
@@ -170,11 +174,11 @@ services:
       - "./etc/metabase/data:/metabase-data"
     environment:
       MB_DB_TYPE: postgres
-      MB_DB_HOST: postgres
-      MB_DB_PORT: ${POSTGRES_PORT_INTERNAL}
-      MB_DB_DBNAME: ${POSTGRES_DATABASE}
-      MB_DB_USER: ${POSTGRES_USERNAME}
-      MB_DB_PASS: ${POSTGRES_PASSWORD}
+      MB_DB_HOST: ${POSTGRES_METABASE_CONTAINER_NAME}
+      MB_DB_PORT: ${POSTGRES_METABASE_PORT_INTERNAL}
+      MB_DB_DBNAME: ${POSTGRES_METABASE_DATABASE}
+      MB_DB_USER: ${POSTGRES_METABASE_USERNAME}
+      MB_DB_PASS: ${POSTGRES_METABASE_PASSWORD}
       MB_LDAP_ENABLED: true
       MB_LDAP_BIND_DN: cn=admin,dc=example,dc=org
       MB_LDAP_GROUP_BASE: cn=readers
@@ -189,15 +193,11 @@ services:
       - ${METABASE_PORT_EXTERNAL}:${METABASE_PORT_INTERNAL}
     depends_on:
       materialized: { condition: service_healthy }
-      postgres: { condition: service_healthy }
+      metabase-postgres: { condition: service_healthy }
       # openldap: { condition: }
-  # v0.26.5: dbt:1.0.4
-  # v0.27.0: dbt:1.2.1
-  # latest, db:1.2.1
+
   dbt:
-    image: materialize/dbt-materialize:v0.27.0
-          # ghcr.io/dbt-labs/dbt-core:1.3.latest
-          # https://github.com/dbt-labs/dbt-core/tree/main/docker
+    image: ${DBT_IMAGE}:${DBT_VERSION}
     container_name: dbt
     restart: "no"
     stdin_open: true
@@ -214,3 +214,8 @@ services:
       DBT_PROFILES_DIR: /root/.dbt
       DBT_PROJECT_DIR: /root/.dbt
       TZ: Etc/GMT+1
+
+volumes:
+  redpanda:
+  metabase-postgres:
+  sqlpad:

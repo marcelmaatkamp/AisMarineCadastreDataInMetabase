@@ -89,7 +89,7 @@ services:
       KAFKA_HEAP_OPTS: -Xms128M
       
   materialized:
-    image: materialize/materialized:v0.28.5
+    image: materialize/materialized:${MATERIALIZE_VERSION}
     container_name: materialized
     depends_on: [redpanda]
     restart: unless-stopped

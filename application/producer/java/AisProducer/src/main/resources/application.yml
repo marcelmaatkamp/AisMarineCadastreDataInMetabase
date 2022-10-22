@@ -1,6 +1,3 @@
-topic:
-  name: boe
-
 spring:
   kafka:
     properties:
@@ -10,4 +7,4 @@ spring:
         value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
     bootstrap-servers: localhost:9092
     template:
-      default-topic: boe
+      default-topic: AisVesselData

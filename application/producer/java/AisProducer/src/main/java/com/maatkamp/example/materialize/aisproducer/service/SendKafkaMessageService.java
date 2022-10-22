@@ -13,9 +13,6 @@ import org.springframework.stereotype.Service;
 @EnableScheduling
 public class SendKafkaMessageService {
 
-    @Value("${topic.name}")
-    private String topic;
-
     private final KafkaTemplate<String, AisVesselData> kafkaTemplate;
 
     @Autowired
@@ -24,7 +21,7 @@ public class SendKafkaMessageService {
     }
 
     public void send(AisVesselData aisVesselData) {
-        kafkaTemplate.send(topic, aisVesselData.getIMO().toString(), aisVesselData);
+        kafkaTemplate.sendDefault(aisVesselData.getIMO().toString(), aisVesselData);
         log.info(String.format(" -> %s", aisVesselData));
     }
 }

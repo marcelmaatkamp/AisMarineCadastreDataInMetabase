@@ -1,19 +1,9 @@
 version: '3.8'
 services:
 
-  nginx:
-    image: nginx
-    container_name: nginx
-    environment:
-      - "NGINX_PORT=${NGINX_PORT_INTERNAL}"
-    volumes:
-      - ./etc/nginx/html:/usr/share/nginx/html:ro
-    ports:
-      - "${NGINX_PORT_EXTERNAL}:${NGINX_PORT_INTERNAL}"
-    healthcheck: {test: "curl -f localhost:${NGINX_PORT_INTERNAL}", interval: 1s, start_period: 30s}
-
   redpanda:
     image: docker.vectorized.io/vectorized/redpanda:${REDPANDA_VERSION}
+    restart: unless-stopped
     container_name: ${REDPANDA_CONTAINER_NAME}
     command:
      - redpanda start
@@ -41,8 +31,8 @@ services:
 
   redpanda-console:
     image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
+    restart: unless-stopped
     container_name: redpanda-console
-    restart: on-failure
     entrypoint: /bin/sh
     command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
     environment:
@@ -62,14 +52,14 @@ services:
       - "${REDPANDA_CONSOLE_PORT_EXTERNAL}:${REDPANDA_CONSOLE_PORT_INTERNAL}"
     healthcheck: { test: "curl -f localhost:${REDPANDA_CONSOLE_PORT_INTERNAL}", interval: 1s, start_period: 30s }
     depends_on:
-      - redpanda
+      redpanda:
+        condition: service_healthy
 
   connect:
     image: docker.cloudsmith.io/redpanda/connectors/connectors:624ff9e
+    restart: unless-stopped
     hostname: connect
     container_name: connect
-    depends_on:
-    - redpanda
     ports:
       - "8083:8083"
     environment:
@@ -87,33 +77,50 @@ services:
       KAFKA_CONNECT_BOOTSTRAP_SERVERS: redpanda:9092
       KAFKA_GC_LOG_ENABLED: "false"
       KAFKA_HEAP_OPTS: -Xms128M
-      
+    depends_on:
+      redpanda:
+        condition: service_healthy
+
   materialized:
-    image: materialize/materialized:${MATERIALIZE_VERSION}
-    container_name: materialized
-    depends_on: [redpanda]
+    image: materialize/materialized:${MATERIALIZED_VERSION}
+    container_name: ${MATERIALIZED_CONTAINER_NAME}
+    depends_on:
+      redpanda:
+        condition: service_healthy
     restart: unless-stopped
     environment:
       # TODO: minio
       MZ_PERSIST_BLOB_URL: file:///tmp/blob.blob
     ports:
-      - "${MATERIALIZE_PORT_DB_EXTERNAL}:${MATERIALIZE_PORT_DB_INTERNAL}"
-    healthcheck: {test: "curl -f localhost:${MATERIALIZE_PORT_DB_INTERNAL}", interval: 5s, start_period: 30s}
+      - "${MATERIALIZED_PORT_DB_EXTERNAL}:${MATERIALIZED_PORT_DB_INTERNAL}"
+    healthcheck:
+      test: "PGHOST=${MATERIALIZED_CONTAINER_NAME} PGPORT=${MATERIALIZED_PORT_DB_INTERNAL} PGDATABASE=${MATERIALIZED_DATABASE} PGUSER=${MATERIALIZED_USERNAME} PGPASSWORD=${MATERIALIZED_PASSWORD} pg_isready"
+      interval: 5s
+      start_period: 45s
 
   materialized-cli:
-    image: materialize/cli:${MATERIALIZE_VERSION}
+    image: materialize/cli:${MATERIALIZED_VERSION}
+    restart: unless-stopped
     container_name: materialized-cli
     init: true
     tty: true
     stdin_open: true
+    environment:
+      PGHOST: ${MATERIALIZED_CONTAINER_NAME}
+      PGPORT: ${MATERIALIZED_PORT_DB_INTERNAL}
+      PGDATABASE: ${MATERIALIZED_DATABASE}
+      PGUSER: ${POSTGRES_METABASE_USERNAME}
+      PGPASSWORD: ${POSTGRES_METABASE_PASSWORD}
     depends_on:
-      materialized: { condition: service_healthy }
-      redpanda: { condition: service_healthy }
+      materialized:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
 
   metabase-postgres:
     image: postgres:${POSTGRES_METABASE_VERSION}
     container_name: ${POSTGRES_METABASE_CONTAINER_NAME}
-    restart: always
+    restart: unless-stopped
     ports:
       - "${POSTGRES_METABASE_PORT_EXTERNAL}:${POSTGRES_METABASE_PORT_INTERNAL}"
     environment:
@@ -128,6 +135,7 @@ services:
   sqlpad:
     image: sqlpad/sqlpad:6
     container_name: sqlpad
+    restart: unless-stopped
     ports:
       - "${SQLPAD_PORT_EXTERNAL}:${SQLPAD_PORT_INTERNAL}"
     environment:
@@ -147,13 +155,14 @@ services:
     volumes:
       - sqlpad:/etc/sqlpad/seed-data
     depends_on:
-      metabase-postgres: { condition: service_healthy }
+      metabase-postgres:
+        condition: service_healthy
 
 # https://github.com/osixia/docker-openldap/blob/master/example/docker-compose.yml
   openldap:
     image: bitnami/openldap:2.4.57
-    hostname: openldap
     container_name: openldap
+    restart: unless-stopped
     ports:
       - 1389:1389
     environment:
@@ -170,6 +179,7 @@ services:
   metabase:
     image: metabase/metabase:${METABASE_VERSION}
     container_name: metabase
+    restart: unless-stopped
     volumes:
       - "./etc/metabase/data:/metabase-data"
     environment:
@@ -192,19 +202,19 @@ services:
     ports:
       - ${METABASE_PORT_EXTERNAL}:${METABASE_PORT_INTERNAL}
     depends_on:
-      materialized: { condition: service_healthy }
-      metabase-postgres: { condition: service_healthy }
+      materialized:
+        condition: service_healthy
+      metabase-postgres:
+        condition: service_healthy
       # openldap: { condition: }
 
   dbt:
     image: ${DBT_IMAGE}:${DBT_VERSION}
-    container_name: dbt
+    container_name: ${DBT_CONTAINER_NAME}
     restart: "no"
     stdin_open: true
     tty: true
     command: bash -c 'dbt run --project-dir=/usr/app; dbt docs generate --project-dir=/usr/app; dbt docs serve --project-dir=/usr/app'
-    depends_on:
-      - materialized
     volumes:
       - ./etc/dbt/app/dbt/example:/usr/app/
       - ./etc/dbt/profile/:/root/.dbt/
@@ -214,6 +224,10 @@ services:
       DBT_PROFILES_DIR: /root/.dbt
       DBT_PROJECT_DIR: /root/.dbt
       TZ: Etc/GMT+1
+    depends_on:
+      materialized:
+        condition: service_healthy
+    healthcheck: { test: "curl -f localhost:${DBT_PORT_INTERNAL}", interval: 1s, start_period: 30s }
 
 volumes:
   redpanda:

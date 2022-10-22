@@ -20,7 +20,6 @@ public class DefaultKafkaConsumerFactoryAfterPropertiesSetConfiguration {
         this.defaultKafkaConsumerFactory = defaultKafkaConsumerFactory;
         defaultKafkaConsumerFactory.setConfigureDeserializers(false);
         log.info(ReflectionToStringBuilder.toString(defaultKafkaConsumerFactory));
-
     }
 
 }

@@ -3,7 +3,6 @@ package com.maatkamp.example.materialize.aisproducer.service;
 import gov.marinecadastre.ais.AisVesselData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,7 @@ public class SendKafkaMessageService {
     }
 
     public void send(AisVesselData aisVesselData) {
-        kafkaTemplate.sendDefault(aisVesselData.getIMO().toString(), aisVesselData);
-        log.info(String.format(" -> %s", aisVesselData));
+        kafkaTemplate.sendDefault(aisVesselData.getMmsi().toString(), aisVesselData);
+        // log.info(String.format(" -> %s", aisVesselData));
     }
 }

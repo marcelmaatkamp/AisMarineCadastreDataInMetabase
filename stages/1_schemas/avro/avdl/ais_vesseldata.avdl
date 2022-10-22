@@ -1,3 +1,5 @@
+// https://coast.noaa.gov/data/marinecadastre/ais/data-dictionary.pdf
+
 /**  An example protocol in Avro IDL */
 @namespace("gov.marinecadastre.ais")
 protocol AisVesselData {
@@ -5,54 +7,54 @@ protocol AisVesselData {
 	/** Ais Vessel Data */
 	record AisVesselData {
 		/**  Maritime Mobile Service Identity (MMSI) */
-		int mmsi;
+		union { null, int }  mmsi = null;
 
 		/** Observation date */
-		time_ms baseDateTime;
+		union {  null, time_ms } baseDateTime = null;
 
 		/** Latitude */
-		double lat;
+		union {  null, double } lat = null;
 
 		/** Longitude */
-		double lon;
+		union {  null, double } lon = null;
 
 		/** Speed over ground (SOG) */
-		double SOG;
+		union {  null, double } SOG = null;
 
 		/**  course over ground (COG) */
-		double COG;
+		union {  null, double } COG = null;
 
 		/** Heading */
-		double heading;
+		union {  null, double } heading = null;
 
 		/** Name of the vessel  */
-		string vesselName;
+		union {  null, string } vesselName = null;
 
 		/** IMO vessel number */
-		string IMO;
+		union {  null, string } IMO = null;
 
 		/** Callsign */
-		string callSign;
+		union {  null, string } callSign = null;
 
 		/** Type of vessel */
-		int vesselType;
+		union {  null, int } vesselType = null;
 
 		/** Status */
-		int status;
+		union {  null, int } status = null;
 
 		/** Length */
-		int length;
+		union {  null, int } length = null;
 
 		/** Width */
-		int width;
+		union {  null, int } width = null;
 
 		/** Draft */
-		double draft;
+		union {  null, double } draft = null;
 
 		/** Cargo */
-		int cargo;
+		union {  null, int } cargo = null;
 
 		/** Transceiver Class */
-		string transceiverClass;
+		union { null, string } transceiverClass = null;
 	}
 }

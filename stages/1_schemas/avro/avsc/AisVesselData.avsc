@@ -5,74 +5,91 @@
   "doc" : "Ais Vessel Data",
   "fields" : [ {
     "name" : "mmsi",
-    "type" : "int",
-    "doc" : "Maritime Mobile Service Identity (MMSI)"
+    "type" : [ "null", "int" ],
+    "doc" : "Maritime Mobile Service Identity (MMSI)",
+    "default" : null
   }, {
     "name" : "baseDateTime",
-    "type" : {
+    "type" : [ "null", {
       "type" : "int",
       "logicalType" : "time-millis"
-    },
-    "doc" : "Observation date"
+    } ],
+    "doc" : "Observation date",
+    "default" : null
   }, {
     "name" : "lat",
-    "type" : "double",
-    "doc" : "Latitude"
+    "type" : [ "null", "double" ],
+    "doc" : "Latitude",
+    "default" : null
   }, {
     "name" : "lon",
-    "type" : "double",
-    "doc" : "Longitude"
+    "type" : [ "null", "double" ],
+    "doc" : "Longitude",
+    "default" : null
   }, {
     "name" : "SOG",
-    "type" : "double",
-    "doc" : "Speed over ground (SOG)"
+    "type" : [ "null", "double" ],
+    "doc" : "Speed over ground (SOG)",
+    "default" : null
   }, {
     "name" : "COG",
-    "type" : "double",
-    "doc" : "course over ground (COG)"
+    "type" : [ "null", "double" ],
+    "doc" : "course over ground (COG)",
+    "default" : null
   }, {
     "name" : "heading",
-    "type" : "double",
-    "doc" : "Heading"
+    "type" : [ "null", "double" ],
+    "doc" : "Heading",
+    "default" : null
   }, {
     "name" : "vesselName",
-    "type" : "string",
-    "doc" : "Name of the vessel"
+    "type" : [ "null", "string" ],
+    "doc" : "Name of the vessel",
+    "default" : null
   }, {
     "name" : "IMO",
-    "type" : "string",
-    "doc" : "IMO vessel number"
+    "type" : [ "null", "string" ],
+    "doc" : "IMO vessel number",
+    "default" : null
   }, {
     "name" : "callSign",
-    "type" : "string",
-    "doc" : "Callsign"
+    "type" : [ "null", "string" ],
+    "doc" : "Callsign",
+    "default" : null
   }, {
     "name" : "vesselType",
-    "type" : "int",
-    "doc" : "Type of vessel"
+    "type" : [ "null", "int" ],
+    "doc" : "Type of vessel",
+    "default" : null
   }, {
     "name" : "status",
-    "type" : "int",
-    "doc" : "Status"
+    "type" : [ "null", "int" ],
+    "doc" : "Status",
+    "default" : null
   }, {
     "name" : "length",
-    "type" : "int",
-    "doc" : "Length"
+    "type" : [ "null", "int" ],
+    "doc" : "Length",
+    "default" : null
   }, {
     "name" : "width",
-    "type" : "int",
-    "doc" : "Width"
+    "type" : [ "null", "int" ],
+    "doc" : "Width",
+    "default" : null
   }, {
     "name" : "draft",
-    "type" : "double",
-    "doc" : "Draft"
+    "type" : [ "null", "double" ],
+    "doc" : "Draft",
+    "default" : null
   }, {
     "name" : "cargo",
-    "type" : "int",
-    "doc" : "Cargo"
+    "type" : [ "null", "int" ],
+    "doc" : "Cargo",
+    "default" : null
   }, {
     "name" : "transceiverClass",
-    "type" : "string",
-    "doc" : "Transceiver Class"
+    "type" : [ "null", "string" ],
+    "doc" : "Transceiver Class",
+    "default" : null
   } ]
 }

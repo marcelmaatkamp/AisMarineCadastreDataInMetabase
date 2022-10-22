@@ -12,20 +12,19 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @EnableScheduling
 public class SendKafkaMessageService {
-    private final KafkaTemplate<String, AisVesselData> kafkaTemplate;
-    private final String topicName;
+
+    @Value("${topic.name}")
+    private String topic;
+
+    private final KafkaTemplate kafkaTemplate;
 
     @Autowired
-    public SendKafkaMessageService(
-            KafkaTemplate<String, AisVesselData> kafkaTemplate,
-            @Value(value = "${monitor.topic.name}") String topicName,
-            @Value(value = "${monitor.producer.simulate}") String enabled) {
+    public SendKafkaMessageService(KafkaTemplate kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
-        this.topicName = topicName;
     }
 
     public void send(AisVesselData aisVesselData) {
-        kafkaTemplate.send(topicName, aisVesselData);
+        kafkaTemplate.send(topic, aisVesselData.getIMO().toString(), aisVesselData);
+        log.info(String.format(" -> %s", aisVesselData));
     }
-
 }

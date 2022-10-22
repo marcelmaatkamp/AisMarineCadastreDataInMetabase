@@ -1,29 +1,16 @@
+topic:
+  name: boe
+
 spring:
   kafka:
-    security:
-      protocol: PLAINTEXT
-    bootstrap-servers: localhost:9092
-    streams:
-      state-dir: /tmp
-#    ssl:
-#      trust-store-location: classpath:/client-certs/kafka.client.truststore.jks
-#      trust-store-password: password
-#      key-store-location:  classpath:/client-certs/kafka.client.keystore.jks
-#      key-store-password: password
-
-    consumer:
-      group-id: demo-group-id
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-
+    properties:
+      schema.registry.url: http://localhost:8081
     producer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-
-
-monitor:
-  producer:
-    simulate: true
-  topic:
-    name: test-topic
+        key.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+        value.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+        schema.registry.url: http://localhost:8081
+        properties:
+          schema.registry.url: http://localhost:8081
+    bootstrap-servers: localhost:9092
+    template:
+      default-topic: boe

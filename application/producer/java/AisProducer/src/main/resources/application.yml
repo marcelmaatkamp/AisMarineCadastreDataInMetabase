@@ -4,13 +4,10 @@ topic:
 spring:
   kafka:
     properties:
-      schema.registry.url: http://localhost1:8081
+      schema.registry.url: http://localhost:8081
     producer:
-        key.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-        value.serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-        schema.registry.url: http://localhost2:8081
-        properties:
-          schema.registry.url: http://localhost3:8081
+        key-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+        value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
     bootstrap-servers: localhost:9092
     template:
       default-topic: boe

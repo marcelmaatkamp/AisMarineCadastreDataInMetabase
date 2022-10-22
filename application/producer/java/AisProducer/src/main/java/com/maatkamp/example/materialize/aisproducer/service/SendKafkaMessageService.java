@@ -16,10 +16,10 @@ public class SendKafkaMessageService {
     @Value("${topic.name}")
     private String topic;
 
-    private final KafkaTemplate kafkaTemplate;
+    private final KafkaTemplate<String, AisVesselData> kafkaTemplate;
 
     @Autowired
-    public SendKafkaMessageService(KafkaTemplate kafkaTemplate) {
+    public SendKafkaMessageService(KafkaTemplate<String, AisVesselData> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 

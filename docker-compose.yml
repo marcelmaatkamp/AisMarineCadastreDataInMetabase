@@ -28,6 +28,9 @@ services:
     volumes:
       - redpanda:/var/lib/redpanda/data
     healthcheck: {test: "curl -f localhost:${REDPANDA_PORT_PROMETHEUS_INTERNAL}/v1/status/ready", interval: 1s, start_period: 30s}
+    profiles:
+      - redpanda
+      - materialized
 
   redpanda-console:
     image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
@@ -54,6 +57,9 @@ services:
     depends_on:
       redpanda:
         condition: service_healthy
+    profiles:
+      - redpanda
+      - materialized
 
   connect:
     image: docker.cloudsmith.io/redpanda/connectors/connectors:624ff9e
@@ -80,6 +86,8 @@ services:
     depends_on:
       redpanda:
         condition: service_healthy
+    profiles:
+      - extra
 
   materialized:
     image: materialize/materialized:${MATERIALIZED_VERSION}
@@ -93,10 +101,13 @@ services:
       MZ_PERSIST_BLOB_URL: file:///tmp/blob.blob
     ports:
       - "${MATERIALIZED_PORT_DB_EXTERNAL}:${MATERIALIZED_PORT_DB_INTERNAL}"
+      - "${MATERIALIZED_PORT_HTTP_EXTERNAL}:${MATERIALIZED_PORT_HTTP_INTERNAL}"
     healthcheck:
       test: "PGHOST=${MATERIALIZED_CONTAINER_NAME} PGPORT=${MATERIALIZED_PORT_DB_INTERNAL} PGDATABASE=${MATERIALIZED_DATABASE} PGUSER=${MATERIALIZED_USERNAME} PGPASSWORD=${MATERIALIZED_PASSWORD} pg_isready"
       interval: 5s
       start_period: 45s
+    profiles:
+      - materialized
 
   materialized-cli:
     image: materialize/cli:${MATERIALIZED_VERSION}
@@ -116,6 +127,30 @@ services:
         condition: service_healthy
       redpanda:
         condition: service_healthy
+    profiles:
+      - materialized
+
+  dbt:
+    image: ${DBT_IMAGE}:${DBT_VERSION}
+    container_name: ${DBT_CONTAINER_NAME}
+    restart: "no"
+    stdin_open: true
+    tty: true
+    command: bash -c 'dbt run --project-dir=/usr/app; dbt docs generate --project-dir=/usr/app; dbt docs serve --project-dir=/usr/app'
+    volumes:
+      - ./etc/dbt/app/dbt/example:/usr/app/
+      - ./etc/dbt/profile/:/root/.dbt/
+    ports:
+      - "${DBT_PORT_EXTERNAL}:${DBT_PORT_INTERNAL}"
+    environment:
+      DBT_PROFILES_DIR: /root/.dbt
+      TZ: Etc/GMT+1
+    depends_on:
+      materialized:
+        condition: service_healthy
+    healthcheck: { test: "curl -f localhost:${DBT_PORT_INTERNAL}", interval: 1s, start_period: 30s }
+    profiles:
+      - dbt
 
   metabase-postgres:
     image: postgres:${POSTGRES_METABASE_VERSION}
@@ -131,32 +166,8 @@ services:
     volumes:
       - metabase-postgres:/var/lib/postgresql/data
     healthcheck: { test: "pg_isready", interval: 5s, start_period: 30s }
-
-  sqlpad:
-    image: sqlpad/sqlpad:6
-    container_name: sqlpad
-    restart: unless-stopped
-    ports:
-      - "${SQLPAD_PORT_EXTERNAL}:${SQLPAD_PORT_INTERNAL}"
-    environment:
-      SQLPAD_ADMIN: "admin@sqlpad.com"
-      SQLPAD_ADMIN_PASSWORD: "admin"
-      SQLPAD_APP_LOG_LEVEL: debug
-      SQLPAD_WEB_LOG_LEVEL: warn
-      SQLPAD_SEED_DATA_PATH: /etc/sqlpad/seed-data
-      SQLPAD_CONNECTIONS__pgdemo__name: metabase
-      SQLPAD_CONNECTIONS__pgdemo__driver: postgres
-      SQLPAD_CONNECTIONS__pgdemo__host: ${POSTGRES_METABASE_CONTAINER_NAME}
-      SQLPAD_CONNECTIONS__pgdemo__database: ${POSTGRES_METABASE_DATABASE}
-      SQLPAD_CONNECTIONS__pgdemo__username: ${POSTGRES_METABASE_USERNAME}
-      SQLPAD_CONNECTIONS__pgdemo__password: ${POSTGRES_METABASE_PASSWORD}
-      SQLPAD_CONNECTIONS__pgdemo__multiStatementTransactionEnabled: "true"
-      SQLPAD_CONNECTIONS__pgdemo__idleTimeoutSeconds: 86400
-    volumes:
-      - sqlpad:/etc/sqlpad/seed-data
-    depends_on:
-      metabase-postgres:
-        condition: service_healthy
+    profiles:
+      - metabase
 
 # https://github.com/osixia/docker-openldap/blob/master/example/docker-compose.yml
   openldap:
@@ -175,6 +186,8 @@ services:
       - LDAP_USER_DC=users
       - LDAP_GROUP=readers
     # healthcheck: {test: " ldapsearch -H ldap://127.0.0.1:1389 -D dc=example,dc=com -w GoodNewsEveryone -b cn=admin,dc=planetexpress,dc=com", interval: 1s, start_period: 30s}
+    profiles:
+      - metabase
 
   metabase:
     image: metabase/metabase:${METABASE_VERSION}
@@ -207,26 +220,45 @@ services:
       metabase-postgres:
         condition: service_healthy
       # openldap: { condition: }
+    profiles:
+      - metabase
 
-  dbt:
-    image: ${DBT_IMAGE}:${DBT_VERSION}
-    container_name: ${DBT_CONTAINER_NAME}
-    restart: "no"
-    stdin_open: true
-    tty: true
-    command: bash -c 'dbt run --project-dir=/usr/app; dbt docs generate --project-dir=/usr/app; dbt docs serve --project-dir=/usr/app'
-    volumes:
-      - ./etc/dbt/app/dbt/example:/usr/app/
-      - ./etc/dbt/profile/:/root/.dbt/
+  sqlpad:
+    image: sqlpad/sqlpad:6
+    container_name: sqlpad
+    restart: unless-stopped
     ports:
-      - "${DBT_PORT_EXTERNAL}:${DBT_PORT_INTERNAL}"
+      - "${SQLPAD_PORT_EXTERNAL}:${SQLPAD_PORT_INTERNAL}"
     environment:
-      DBT_PROFILES_DIR: /root/.dbt
-      TZ: Etc/GMT+1
+      SQLPAD_ADMIN: "admin@sqlpad.com"
+      SQLPAD_ADMIN_PASSWORD: "admin"
+      SQLPAD_APP_LOG_LEVEL: debug
+      SQLPAD_WEB_LOG_LEVEL: warn
+      SQLPAD_SEED_DATA_PATH: /etc/sqlpad/seed-data
+      #      SQLPAD_CONNECTIONS__pgdemo__name: metabase
+      #      SQLPAD_CONNECTIONS__pgdemo__driver: postgres
+      #      SQLPAD_CONNECTIONS__pgdemo__host: ${POSTGRES_METABASE_CONTAINER_NAME}
+      #      SQLPAD_CONNECTIONS__pgdemo__database: ${POSTGRES_METABASE_DATABASE}
+      #      SQLPAD_CONNECTIONS__pgdemo__username: ${POSTGRES_METABASE_USERNAME}
+      #      SQLPAD_CONNECTIONS__pgdemo__password: ${POSTGRES_METABASE_PASSWORD}
+      #      SQLPAD_CONNECTIONS__pgdemo__multiStatementTransactionEnabled: "true"
+      #      SQLPAD_CONNECTIONS__pgdemo__idleTimeoutSeconds: 86400
+      SQLPAD_CONNECTIONS__materialized__name: materialized
+      SQLPAD_CONNECTIONS__materialized__driver: postgres
+      SQLPAD_CONNECTIONS__materialized__host: ${MATERIALIZED_CONTAINER_NAME}
+      SQLPAD_CONNECTIONS__materialized__port: ${MATERIALIZED_PORT_DB_INTERNAL}
+      SQLPAD_CONNECTIONS__materialized__database: ${MATERIALIZED_DATABASE}
+      SQLPAD_CONNECTIONS__materialized__username: ${MATERIALIZED_USERNAME}
+      SQLPAD_CONNECTIONS__materialized__password: ${MATERIALIZED_PASSWORD}
+      SQLPAD_CONNECTIONS__materialized__multiStatementTransactionEnabled: "true"
+      SQLPAD_CONNECTIONS__materialized__idleTimeoutSeconds: 86400
+    volumes:
+      - sqlpad:/etc/sqlpad/seed-data
     depends_on:
-      materialized:
+      metabase-postgres:
         condition: service_healthy
-    healthcheck: { test: "curl -f localhost:${DBT_PORT_INTERNAL}", interval: 1s, start_period: 30s }
+    profiles:
+      - extra
 
 volumes:
   redpanda:

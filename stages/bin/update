@@ -1,3 +1,3 @@
 #!/bin/bash
 bash -c 'cd 1_schemas && bin/update'
-bash -c 'c'd 2_materialize_source_kafka_connection && bin/update'
+bash -c 'cd 2_materialize_source_kafka_connection && bin/update'

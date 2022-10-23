@@ -7,6 +7,11 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
+/**
+ * Sends @{@link AisVesselData} to kafka
+ *
+ * @author Marcel Maatkamp <m.maatkamp@gmail.com>
+ */
 @Service
 @Slf4j
 @EnableScheduling

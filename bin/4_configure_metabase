@@ -47,6 +47,7 @@ curl -s -X POST \
           "host": "materialized",
           "port": "6875",
           "db": "materialize",
+          "schema": "public",
           "user": "materialize",
           "password": "materialize"
       }

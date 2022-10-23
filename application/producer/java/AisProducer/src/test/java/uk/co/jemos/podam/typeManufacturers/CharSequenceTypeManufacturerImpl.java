@@ -1,5 +1,6 @@
 package uk.co.jemos.podam.typeManufacturers;
 
+import org.apache.commons.lang3.StringUtils;
 import uk.co.jemos.podam.api.AttributeMetadata;
 import uk.co.jemos.podam.api.DataProviderStrategy;
 import uk.co.jemos.podam.api.PodamUtils;
@@ -8,8 +9,6 @@ import uk.co.jemos.podam.common.PodamStringValue;
 
 import java.lang.reflect.Type;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Default CharSequence type manufacturer.

@@ -30,7 +30,6 @@ services:
     healthcheck: {test: "curl -f localhost:${REDPANDA_PORT_PROMETHEUS_INTERNAL}/v1/status/ready", interval: 1s, start_period: 30s}
     profiles:
       - redpanda
-      - materialized
 
   redpanda-console:
     image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
@@ -59,7 +58,6 @@ services:
         condition: service_healthy
     profiles:
       - redpanda
-      - materialized
 
   connect:
     image: docker.cloudsmith.io/redpanda/connectors/connectors:624ff9e
@@ -191,7 +189,7 @@ services:
 
   metabase:
     image: metabase/metabase:${METABASE_VERSION}
-    container_name: metabase
+    container_name: ${METABASE_CONTAINER_NAME}
     restart: unless-stopped
     volumes:
       - "./etc/metabase/data:/metabase-data"
@@ -220,6 +218,7 @@ services:
       metabase-postgres:
         condition: service_healthy
       # openldap: { condition: }
+    healthcheck: { test: "curl -f ${METABASE_CONTAINER_NAME}:${METABASE_PORT_INTERNAL}", interval: 1s, start_period: 30s }
     profiles:
       - metabase
 

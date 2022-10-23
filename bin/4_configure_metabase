@@ -1,0 +1,53 @@
+#!/bin/bash
+
+admin_email=admin@admin.com
+admin_password=blaBLA987
+admin_firstname=admin
+admin_lastname=admin
+
+export SETUP_TOKEN=$(curl -s -m 5 -X GET \
+  -H "Content-Type: application/json" \
+    http://localhost:3000/api/session/properties \
+  | jq -r '.["setup-token"]'
+)
+echo "setup token: ${SETUP_TOKEN}"
+
+curl -X POST \
+  -H "Content-type: application/json" \
+  http://localhost:3000/api/setup \
+  -d "{
+    \"token\": \"${SETUP_TOKEN}\",
+    \"user\": {
+        \"email\": \"${admin_email}\",
+        \"first_name\": \"${admin_firstname}\",
+        \"last_name\": \"${admin_lastname}\",
+        \"password\": \"${admin_password}\"
+    },
+    \"prefs\": {
+        \"allow_tracking\": true,
+        \"site_name\": \"My Metabase Instance\"
+    }
+  }"
+
+TOKEN=$(curl -s -X POST \
+ -H "Content-Type: application/json" \
+ -d "{\"username\": \"${admin_email}\", \"password\": \"${admin_password}\"}" \
+ http://localhost:3000/api/session | jq -r '.id')
+
+echo "token: ${TOKEN}"
+
+curl -s -X POST \
+  -H "Content-type: application/json" \
+  -H "X-Metabase-Session: ${TOKEN}" \
+  http://localhost:3000/api/database \
+  -d '{
+      "engine": "postgres",
+      "name": "materialized",
+      "details": {
+          "host": "materialized",
+          "port": "6875",
+          "db": "materialize",
+          "user": "materialize",
+          "password": "materialize"
+      }
+  }'

@@ -1,0 +1,69 @@
+version: '3.8'
+services:
+
+  metabase-postgres:
+    image: postgres:${POSTGRES_METABASE_VERSION}
+    container_name: ${POSTGRES_METABASE_CONTAINER_NAME}
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_METABASE_PORT_EXTERNAL}:${POSTGRES_METABASE_PORT_INTERNAL}"
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: ${POSTGRES_METABASE_DATABASE}
+      POSTGRES_USER: ${POSTGRES_METABASE_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_METABASE_PASSWORD}
+    volumes:
+      - metabase-postgres:/var/lib/postgresql/data
+    healthcheck: { test: "pg_isready", interval: 5s, start_period: 30s }
+
+  # https://github.com/osixia/docker-openldap/blob/master/example/docker-compose.yml
+  openldap:
+    image: bitnami/openldap:2.4.57
+    container_name: openldap
+    restart: unless-stopped
+    ports:
+      - 1389:1389
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_USERS=user01@metabase.com,user02@metabase.com
+      - LDAP_PASSWORDS=password1!,password2!
+      - LDAP_PORT_NUMBER=1389
+      - LDAP_ROOT=dc=example,dc=org
+      - LDAP_USER_DC=users
+      - LDAP_GROUP=readers
+    # healthcheck: {test: " ldapsearch -H ldap://127.0.0.1:1389 -D dc=example,dc=com -w GoodNewsEveryone -b cn=admin,dc=planetexpress,dc=com", interval: 1s, start_period: 30s}
+
+  metabase:
+    image: metabase/metabase:${METABASE_VERSION}
+    container_name: ${METABASE_CONTAINER_NAME}
+    restart: unless-stopped
+    volumes:
+      - "./etc/metabase/data:/metabase-data"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_HOST: ${POSTGRES_METABASE_CONTAINER_NAME}
+      MB_DB_PORT: ${POSTGRES_METABASE_PORT_INTERNAL}
+      MB_DB_DBNAME: ${POSTGRES_METABASE_DATABASE}
+      MB_DB_USER: ${POSTGRES_METABASE_USERNAME}
+      MB_DB_PASS: ${POSTGRES_METABASE_PASSWORD}
+      MB_LDAP_ENABLED: true
+      MB_LDAP_BIND_DN: cn=admin,dc=example,dc=org
+      MB_LDAP_GROUP_BASE: cn=readers
+      MB_LDAP_HOST: openldap
+      MB_LDAP_PASSWORD: adminpassword
+      MB_LDAP_PORT: 1389
+      MB_LDAP_USER_BASE: ou=users,dc=example,dc=org
+      MB_LDAP_ATTRIBUTE_EMAIL: uid
+      MB_LDAP_ATTRIBUTE_FIRSTNAME: uid
+      MB_LDAP_ATTRIBUTE_LASTNAME: sn
+    ports:
+      - ${METABASE_PORT_EXTERNAL}:${METABASE_PORT_INTERNAL}
+    depends_on:
+      metabase-postgres:
+        condition: service_healthy
+      # openldap: { condition: }
+    healthcheck: { test: "curl -f ${METABASE_CONTAINER_NAME}:${METABASE_PORT_INTERNAL}", interval: 1s, start_period: 30s }
+
+volumes:
+  metabase-postgres:

@@ -219,47 +219,8 @@ services:
         condition: service_healthy
       # openldap: { condition: }
     healthcheck: { test: "curl -f ${METABASE_CONTAINER_NAME}:${METABASE_PORT_INTERNAL}", interval: 1s, start_period: 30s }
-    profiles:
-      - metabase
 
-  sqlpad:
-    image: sqlpad/sqlpad:6
-    container_name: sqlpad
-    restart: unless-stopped
-    ports:
-      - "${SQLPAD_PORT_EXTERNAL}:${SQLPAD_PORT_INTERNAL}"
-    environment:
-      SQLPAD_ADMIN: "admin@sqlpad.com"
-      SQLPAD_ADMIN_PASSWORD: "admin"
-      SQLPAD_APP_LOG_LEVEL: debug
-      SQLPAD_WEB_LOG_LEVEL: warn
-      SQLPAD_SEED_DATA_PATH: /etc/sqlpad/seed-data
-      #      SQLPAD_CONNECTIONS__pgdemo__name: metabase
-      #      SQLPAD_CONNECTIONS__pgdemo__driver: postgres
-      #      SQLPAD_CONNECTIONS__pgdemo__host: ${POSTGRES_METABASE_CONTAINER_NAME}
-      #      SQLPAD_CONNECTIONS__pgdemo__database: ${POSTGRES_METABASE_DATABASE}
-      #      SQLPAD_CONNECTIONS__pgdemo__username: ${POSTGRES_METABASE_USERNAME}
-      #      SQLPAD_CONNECTIONS__pgdemo__password: ${POSTGRES_METABASE_PASSWORD}
-      #      SQLPAD_CONNECTIONS__pgdemo__multiStatementTransactionEnabled: "true"
-      #      SQLPAD_CONNECTIONS__pgdemo__idleTimeoutSeconds: 86400
-      SQLPAD_CONNECTIONS__materialized__name: materialized
-      SQLPAD_CONNECTIONS__materialized__driver: postgres
-      SQLPAD_CONNECTIONS__materialized__host: ${MATERIALIZED_CONTAINER_NAME}
-      SQLPAD_CONNECTIONS__materialized__port: ${MATERIALIZED_PORT_DB_INTERNAL}
-      SQLPAD_CONNECTIONS__materialized__database: ${MATERIALIZED_DATABASE}
-      SQLPAD_CONNECTIONS__materialized__username: ${MATERIALIZED_USERNAME}
-      SQLPAD_CONNECTIONS__materialized__password: ${MATERIALIZED_PASSWORD}
-      SQLPAD_CONNECTIONS__materialized__multiStatementTransactionEnabled: "true"
-      SQLPAD_CONNECTIONS__materialized__idleTimeoutSeconds: 86400
-    volumes:
-      - sqlpad:/etc/sqlpad/seed-data
-    depends_on:
-      metabase-postgres:
-        condition: service_healthy
-    profiles:
-      - extra
 
 volumes:
   redpanda:
   metabase-postgres:
-  sqlpad:

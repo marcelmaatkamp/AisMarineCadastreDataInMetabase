@@ -1,10 +1,24 @@
 # materialize-dbt-example
+Ingests AIS data in Materialized and displays contents via Metabase
 
-![](documentation/images/redpanda.png)
+# AIS
+https://marinecadastre.gov/ais/
+![](documentation/images/AIS/AIS_1.png)
+
+## Raw Data Metadata
+https://coast.noaa.gov/data/marinecadastre/ais/data-dictionary.pdf
+![](documentation/images/AIS/AIS_2.png)
+
+## Raw data
+![](documentation/images/AIS/AIS_3.png)
+
+![](documentation/images/redpanda/redpanda.png)
 ![](documentation/images/metabase/metabase_1.png)
 ![](documentation/images/metabase/metabase_2.png)
 ![](documentation/images/metabase/metabase_3.png)
 ![](documentation/images/metabase/metabase_4.png)
+
+# Ingest
 
 # dbt
 

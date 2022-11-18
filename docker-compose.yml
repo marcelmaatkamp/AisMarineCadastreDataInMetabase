@@ -28,8 +28,6 @@ services:
     volumes:
       - redpanda:/var/lib/redpanda/data
     healthcheck: {test: "curl -f localhost:${REDPANDA_PORT_PROMETHEUS_INTERNAL}/v1/status/ready", interval: 1s, start_period: 30s}
-    profiles:
-      - redpanda
 
   redpanda-console:
     image: docker.redpanda.com/vectorized/console:${REDPANDA_CONSOLE_VERSION}
@@ -56,8 +54,6 @@ services:
     depends_on:
       redpanda:
         condition: service_healthy
-    profiles:
-      - redpanda
 
   connect:
     image: docker.cloudsmith.io/redpanda/connectors/connectors:624ff9e
@@ -84,8 +80,6 @@ services:
     depends_on:
       redpanda:
         condition: service_healthy
-    profiles:
-      - extra
 
   materialized:
     image: materialize/materialized:${MATERIALIZED_VERSION}
@@ -104,8 +98,6 @@ services:
       test: "PGHOST=${MATERIALIZED_CONTAINER_NAME} PGPORT=${MATERIALIZED_PORT_DB_INTERNAL} PGDATABASE=${MATERIALIZED_DATABASE} PGUSER=${MATERIALIZED_USERNAME} PGPASSWORD=${MATERIALIZED_PASSWORD} pg_isready"
       interval: 5s
       start_period: 45s
-    profiles:
-      - materialized
 
   materialized-cli:
     image: materialize/cli:${MATERIALIZED_VERSION}
@@ -125,8 +117,6 @@ services:
         condition: service_healthy
       redpanda:
         condition: service_healthy
-    profiles:
-      - materialized
 
   dbt:
     image: ${DBT_IMAGE}:${DBT_VERSION}
@@ -147,8 +137,6 @@ services:
       materialized:
         condition: service_healthy
     healthcheck: { test: "curl -f localhost:${DBT_PORT_INTERNAL}", interval: 1s, start_period: 30s }
-    profiles:
-      - dbt
 
   metabase-postgres:
     image: postgres:${POSTGRES_METABASE_VERSION}
@@ -164,8 +152,6 @@ services:
     volumes:
       - metabase-postgres:/var/lib/postgresql/data
     healthcheck: { test: "pg_isready", interval: 5s, start_period: 30s }
-    profiles:
-      - metabase
 
 # https://github.com/osixia/docker-openldap/blob/master/example/docker-compose.yml
   openldap:
@@ -184,8 +170,6 @@ services:
       - LDAP_USER_DC=users
       - LDAP_GROUP=readers
     # healthcheck: {test: " ldapsearch -H ldap://127.0.0.1:1389 -D dc=example,dc=com -w GoodNewsEveryone -b cn=admin,dc=planetexpress,dc=com", interval: 1s, start_period: 30s}
-    profiles:
-      - metabase
 
   metabase:
     image: metabase/metabase:${METABASE_VERSION}
@@ -219,7 +203,6 @@ services:
         condition: service_healthy
       # openldap: { condition: }
     healthcheck: { test: "curl -f ${METABASE_CONTAINER_NAME}:${METABASE_PORT_INTERNAL}", interval: 1s, start_period: 30s }
-
 
 volumes:
   redpanda:

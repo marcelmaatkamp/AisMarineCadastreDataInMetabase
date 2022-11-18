@@ -23,6 +23,11 @@ $ \
  mvn spring-boot:run
 ```
 
+# docker
+```
+$ mvn spring-boot:build-image
+```
+
 # developnent
 
 ## phases

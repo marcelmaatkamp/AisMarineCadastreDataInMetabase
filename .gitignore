@@ -1,4 +1,4 @@
-
+.terraform*
 .apt_generated/
 .apt_generated_test/
 # are not checked in

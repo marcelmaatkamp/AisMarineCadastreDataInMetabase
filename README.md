@@ -12,41 +12,78 @@ https://coast.noaa.gov/data/marinecadastre/ais/data-dictionary.pdf
 ## Raw data
 ![](documentation/images/AIS/AIS_3.png)
 
-![](documentation/images/redpanda/redpanda.png)
+# start applications
+```bash
+$ docker-compose up -d 
+```
+# initialize applications 
+
+## upload avro ais schema
+stages/1_schemas/avro/avdl/ais_vesseldata.avdl
+```bash
+$ cd stages/1_schemas &&\
+  terraform init &&\
+  terraform plan &&\
+  terraform apply
+```
+# verify schema in redpanda
+http://localhost:8084/schema-registry/AisVesselData-value
+![](documentation/images/redpanda/redpanda_schema.png)
+
+## start dbt connection
+```bash
+$ cd tages/2_materialize_source_kafka_connection &&
+  terraform init &&\
+  terraform plan &&\
+  terraform apply
+```
+## verify dbt connection
+http://localhost:8085/#!/model/model.example.aisvesseldata#details
+![](documentation/images/dbt/dbt_ais_vesseldata.png)
+
+## start ingest
+```
+$ docker-compose -f docker-compose.yml -f docker-compose-ingest.yml run ingest
+```
+
+# verify ingest in redpanda
+http://localhost:8084/topics/AisVesselData?o=-1&p=-1&q&s=50#messages
+![](documentation/images/redpanda/redpanda_data.png)
+
+# verify bt
+http://localhost:8083
+![](documentation/images/dbt/dbt_1.png)
+
+# verify materialized objects
+```bash
+$ docker-compose exec materialized psql -h localhost -p 6875 -c 'show objects;'
+         name          |       type        
+-----------------------+-------------------
+ aisdata               | materialized-view
+ aisvesseldata         | source
+ kafka_connection      | connection
+ kafka_schema_registry | connection
+```
+# verify materialized aisdata
+
+```bash
+ $ docker-compose exec materialized psql -h localhost -p 6875 -c 'select count(*) from aisdata;'
+ count 
+-------
+    51
+(1 row)
+```
+
+# metabase
+http://localhost:3000
+
+| username | password   |
+| -------- |------------|
+| user01@metabase.com | password1! | 
+ | user02@metabase.com | password2! | 
+
 ![](documentation/images/metabase/metabase_1.png)
 ![](documentation/images/metabase/metabase_2.png)
 ![](documentation/images/metabase/metabase_3.png)
 ![](documentation/images/metabase/metabase_4.png)
 
-# Ingest
-
-# dbt
-
-## init
-```
-$ docker-compose run dbt init 
-10:25:39  Running with dbt=1.2.0
-Enter a name for your project (letters, digits, underscore): example
-Which database would you like to use?
-[1] postgres
-
-(Don't see the one you want? https://docs.getdbt.com/docs/available-adapters)
-
-Enter a number: 1
-10:25:52  Profile example written to /root/.dbt/profiles.yml using target's sample configuration. Once updated, you'll be able to start developing with dbt.
-10:25:52  
-Your new dbt project "example" was created!
-
-For more information on how to configure the profiles.yml file,
-please consult the dbt documentation here:
-
-  https://docs.getdbt.com/docs/configure-your-profile
-
-One more thing:
-
-Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
-
-  https://community.getdbt.com/
-
-Happy modeling!
-```

@@ -176,24 +176,24 @@ services:
     container_name: ${METABASE_CONTAINER_NAME}
     restart: unless-stopped
     volumes:
-      - "./etc/metabase/data:/metabase-data"
-    environment:
-      MB_DB_TYPE: postgres
-      MB_DB_HOST: ${POSTGRES_METABASE_CONTAINER_NAME}
-      MB_DB_PORT: ${POSTGRES_METABASE_PORT_INTERNAL}
-      MB_DB_DBNAME: ${POSTGRES_METABASE_DATABASE}
-      MB_DB_USER: ${POSTGRES_METABASE_USERNAME}
-      MB_DB_PASS: ${POSTGRES_METABASE_PASSWORD}
-      MB_LDAP_ENABLED: true
-      MB_LDAP_BIND_DN: cn=admin,dc=example,dc=org
-      MB_LDAP_GROUP_BASE: cn=readers
-      MB_LDAP_HOST: openldap
-      MB_LDAP_PASSWORD: adminpassword
-      MB_LDAP_PORT: 1389
-      MB_LDAP_USER_BASE: ou=users,dc=example,dc=org
-      MB_LDAP_ATTRIBUTE_EMAIL: uid
-      MB_LDAP_ATTRIBUTE_FIRSTNAME: uid
-      MB_LDAP_ATTRIBUTE_LASTNAME: sn
+      - metabase:/metabase-data"
+#    environment:
+#      MB_DB_TYPE: postgres
+#      MB_DB_HOST: ${POSTGRES_METABASE_CONTAINER_NAME}
+#      MB_DB_PORT: ${POSTGRES_METABASE_PORT_INTERNAL}
+#      MB_DB_DBNAME: ${POSTGRES_METABASE_DATABASE}
+#      MB_DB_USER: ${POSTGRES_METABASE_USERNAME}
+#      MB_DB_PASS: ${POSTGRES_METABASE_PASSWORD}
+#      MB_LDAP_ENABLED: true
+#      MB_LDAP_BIND_DN: cn=admin,dc=example,dc=org
+#      MB_LDAP_GROUP_BASE: cn=readers
+#      MB_LDAP_HOST: openldap
+#      MB_LDAP_PASSWORD: adminpassword
+#      MB_LDAP_PORT: 1389
+#      MB_LDAP_USER_BASE: ou=users,dc=example,dc=org
+#      MB_LDAP_ATTRIBUTE_EMAIL: uid
+#      MB_LDAP_ATTRIBUTE_FIRSTNAME: uid
+#      MB_LDAP_ATTRIBUTE_LASTNAME: sn
     ports:
       - ${METABASE_PORT_EXTERNAL}:${METABASE_PORT_INTERNAL}
     depends_on:
@@ -207,3 +207,4 @@ services:
 volumes:
   redpanda:
   metabase-postgres:
+  metabase:

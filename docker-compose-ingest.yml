@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+ ingest:
+  image: docker.io/marcelmaatkamp/gov-marinecadastre-ais-ingest:1.0
+  command: ["-f","/workspace/data/small-sample.csv"]
+  environment:
+   spring.kafka.bootstrap-servers: redpanda:9092
+   spring.kafka.properties.schema.registry.url: http://redpanda:8081
+  volumes:
+   - ./data/small-sample.csv:/workspace/data/small-sample.csv

@@ -10,6 +10,8 @@ graph TD
     Redpanda-- source --> Materialized[(Materialized)]
     DBT-- models --> Materialized
     Metabase-- table -->Materialized
+    Superset-- table -->Materialized
+    Redash-- table -->Materialized
 ```
 
 # AIS

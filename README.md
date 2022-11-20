@@ -2,7 +2,7 @@
 Ingests AIS data in Materialized and displays contents via Metabase.
 
 # schematics
-```mermaidjs
+```mermaid
 %%{ init: { 'flowchart': { 'curve': 'stepBefore' } } }%%
 graph TD
     marinecadastre.gov(marinecadastre.gov)-- raw data --> AisProducer

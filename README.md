@@ -4,9 +4,9 @@ Ingests AIS data in Materialized and displays contents via Metabase.
 # schematics
 ```mermaid
 %%{ init: { 'flowchart': { 'curve': 'stepBefore' } } }%%
-flowchart LR
+flowchart TD
     marinecadastre.gov(marinecadastre.gov)-->AisProducer
-    AisProducer-->Redpanda[/Redpanda\]
+    AisProducer-->Redpanda{{Redpanda}}
     Materialized[(Materialized)]-->Redpanda
     Metabase-->Materialized
     click marinecadastre.gov "https://marinecadastre.gov/ais" _blank

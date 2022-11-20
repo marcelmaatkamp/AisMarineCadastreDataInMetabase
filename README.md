@@ -1,5 +1,18 @@
 # materialize-dbt-example
-Ingests AIS data in Materialized and displays contents via Metabase
+Ingests AIS data in Materialized and displays contents via Metabase.
+
+# schematics
+```mermaid
+flowchart LR
+    A-->JavaAisImporter
+    JavaAisImporter-->Redpanda
+    Materialized-->Redpanda
+    Metabase-->Materialized
+    click A "https://www.github.com" _blank
+    click B "https://www.github.com" "Open this in a new tab" _blank
+    click C href "https://www.github.com" _blank
+    click D href "https://www.github.com" "Open this in a new tab" _blank
+```
 
 # AIS
 https://marinecadastre.gov/ais/

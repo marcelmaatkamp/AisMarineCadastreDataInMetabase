@@ -2,18 +2,14 @@
 Ingests AIS data in Materialized and displays contents via Metabase.
 
 # schematics
-```mermaid
+```mermaidjs
 %%{ init: { 'flowchart': { 'curve': 'stepBefore' } } }%%
-flowchart TD
-    marinecadastre.gov(marinecadastre.gov)-->AisProducer
-    AisProducer-->Redpanda{{Redpanda}}
-    Redpanda-->Materialized[(Materialized)]
-    DBT-->Materialized
-    Metabase-->Materialized
-    click marinecadastre.gov "https://marinecadastre.gov/ais" _blank
-    click AisProducer "https://github.com/marcelmaatkamp/AisMarineCadastreDataInMetabase/tree/master/application/producer/java/AisProducer" "Open this in a new tab" _blank
-    click C href "https://www.github.com" _blank
-    click D href "https://www.github.com" "Open this in a new tab" _blank
+graph TD
+    marinecadastre.gov(marinecadastre.gov)-- raw data --> AisProducer
+    AisProducer-- AVRO --> Redpanda{{Redpanda}}
+    Redpanda-- source --> Materialized[(Materialized)]
+    DBT-- models --> Materialized
+    Metabase-- table -->Materialized
 ```
 
 # AIS

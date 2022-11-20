@@ -4,12 +4,12 @@ Ingests AIS data in Materialized and displays contents via Metabase.
 # schematics
 ```mermaid
 flowchart LR
-    A-->JavaAisImporter
-    JavaAisImporter-->Redpanda
+    marinecadastre.gov-->AisProducer
+    AisProducer-->Redpanda
     Materialized-->Redpanda
     Metabase-->Materialized
-    click A "https://www.github.com" _blank
-    click B "https://www.github.com" "Open this in a new tab" _blank
+    click marinecadastre.gov "https://marinecadastre.gov/ais" _blank
+    click AisProducer "https://github.com/marcelmaatkamp/AisMarineCadastreDataInMetabase/tree/master/application/producer/java/AisProducer" "Open this in a new tab" _blank
     click C href "https://www.github.com" _blank
     click D href "https://www.github.com" "Open this in a new tab" _blank
 ```

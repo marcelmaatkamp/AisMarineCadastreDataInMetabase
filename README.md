@@ -6,8 +6,8 @@ Ingests AIS data in Materialized and displays contents via Metabase.
 flowchart LR
     marinecadastre.gov-->AisProducer
     AisProducer-->Redpanda
-    Materialized-->Redpanda
-    Metabase-->Materialized
+    Redpanda<--Materialized
+    Materialized<--Metabase
     click marinecadastre.gov "https://marinecadastre.gov/ais" _blank
     click AisProducer "https://github.com/marcelmaatkamp/AisMarineCadastreDataInMetabase/tree/master/application/producer/java/AisProducer" "Open this in a new tab" _blank
     click C href "https://www.github.com" _blank

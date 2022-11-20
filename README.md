@@ -9,9 +9,9 @@ graph TD
     AisProducer-- AVRO --> Redpanda{{Redpanda}}
     Redpanda-- source --> Materialized[(Materialized)]
     DBT-- models --> Materialized
-    Metabase-- table -->Materialized
-    Superset-- table -->Materialized
-    Redash-- table -->Materialized
+    Materialized-- table -->Metabase
+    Materialized-- table -->Superset
+    Materialized-- table -->Redash
 ```
 
 # AIS

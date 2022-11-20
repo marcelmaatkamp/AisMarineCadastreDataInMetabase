@@ -3,7 +3,7 @@ Ingests AIS data in Materialized and displays contents via Metabase.
 
 # schematics
 ```mermaid
-graph flowchart
+flowchart
  
 subgraph import["imports"]
 direction TD

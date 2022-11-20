@@ -7,7 +7,8 @@ Ingests AIS data in Materialized and displays contents via Metabase.
 flowchart TD
     marinecadastre.gov(marinecadastre.gov)-->AisProducer
     AisProducer-->Redpanda{{Redpanda}}
-    Materialized[(Materialized)]-->Redpanda
+    Redpanda-->Materialized[(Materialized)]
+    DBT-->Materialized
     Metabase-->Materialized
     click marinecadastre.gov "https://marinecadastre.gov/ais" _blank
     click AisProducer "https://github.com/marcelmaatkamp/AisMarineCadastreDataInMetabase/tree/master/application/producer/java/AisProducer" "Open this in a new tab" _blank

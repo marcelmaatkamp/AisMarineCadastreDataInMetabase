@@ -114,4 +114,6 @@ tmp/
 .idea/
 *.iml
 /stages/2_materialize_source_kafka_connection/.terraform.lock.hcl
-.DS_Store
+.DS_Storea
+.terraform* 
+terraform.*

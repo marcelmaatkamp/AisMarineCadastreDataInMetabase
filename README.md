@@ -19,6 +19,7 @@ subgraph display["views"]
     Materialized--> Metabase
     Materialized--> Superset
     Materialized--> Redash
+    Materialized--> SQLPad
     Materialized--> ...
 end
 ```
@@ -99,13 +100,28 @@ $ docker-compose exec materialized psql -h localhost -p 6875 -c 'show objects;'
 # metabase
 http://localhost:3000
 
-| username | password   |
-| -------- |------------|
-| user01@metabase.com | password1! | 
- | user02@metabase.com | password2! | 
-
 ![](documentation/images/metabase/metabase_1.png)
 ![](documentation/images/metabase/metabase_2.png)
 ![](documentation/images/metabase/metabase_3.png)
 ![](documentation/images/metabase/metabase_4.png)
 
+# superset
+
+## mapbox api key 
+https://account.mapbox.com/access-tokens/create
+
+## start superset
+```bash
+$  MAPBOX_API_KEY=<YOUR_MAPBOX_API_KEY> docker-compose -f docker-compose.yml -f docker-compose-superset.yml up -d superset
+```
+
+# add materialized database 
+![](documentation/images/superset/superset_1.png)
+![](documentation/images/superset/superset_2.png)
+
+## view data
+![](documentation/images/superset/superset_3.png)
+![](documentation/images/superset/superset_4.png)
+![](documentation/images/superset/superset_5.png)
+![](documentation/images/superset/superset_6.png)
+![](documentation/images/superset/superset_7.png)

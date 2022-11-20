@@ -121,7 +121,6 @@ $  MAPBOX_API_KEY=<YOUR_MAPBOX_API_KEY> docker-compose -f docker-compose.yml -f 
 
 ## view data
 ![](documentation/images/superset/superset_3.png)
-![](documentation/images/superset/superset_4.png)
 ![](documentation/images/superset/superset_5.png)
 ![](documentation/images/superset/superset_6.png)
 ![](documentation/images/superset/superset_7.png)

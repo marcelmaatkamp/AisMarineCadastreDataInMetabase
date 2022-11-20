@@ -3,15 +3,27 @@ Ingests AIS data in Materialized and displays contents via Metabase.
 
 # schematics
 ```mermaid
-%%{ init: { 'flowchart': { 'curve': 'stepBefore' } } }%%
-graph TD
-    marinecadastre.gov(marinecadastre.gov)-- raw data --> AisProducer
-    AisProducer-- AVRO --> Redpanda{{Redpanda}}
-    Redpanda-- source --> Materialized[(Materialized)]
-    DBT-- models --> Materialized
-    Materialized-- table -->Metabase
-    Materialized-- table -->Superset
-    Materialized-- table -->Redash
+graph flowchart
+ 
+subgraph import["imports"]
+direction TD
+  marinecadastre.gov(marinecadastre.gov)-- raw data --> AisProducer
+  AisProducer-- AVRO --> Redpanda{{Redpanda}}
+  Redpanda-- source --> Materialized[(Materialized)]
+end
+
+subgraph models["models"]
+direction LR
+    DBT--> Materialized
+end
+
+subgraph display["views"]
+direction RL
+    Materialized--> Metabase
+    Materialized--> Superset
+    Materialized--> Redash
+    Materialized--> ...
+end
 ```
 
 # AIS

@@ -39,7 +39,7 @@ services:
     container_name: ${METABASE_CONTAINER_NAME}
     restart: unless-stopped
     volumes:
-      - "./etc/metabase/data:/metabase-data"
+      - "metabase:/metabase-data"
     environment:
       MB_DB_TYPE: postgres
       MB_DB_HOST: ${POSTGRES_METABASE_CONTAINER_NAME}
@@ -67,3 +67,4 @@ services:
 
 volumes:
   metabase-postgres:
+  metabase:

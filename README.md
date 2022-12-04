@@ -104,6 +104,7 @@ http://localhost:3000
 ![](documentation/images/metabase/metabase_2.png)
 ![](documentation/images/metabase/metabase_3.png)
 ![](documentation/images/metabase/metabase_4.png)
+![](documentation/images/metabase/metabase_5.png)
 
 # superset
 

@@ -91,6 +91,8 @@ services:
     environment:
       # TODO: minio
       MZ_PERSIST_BLOB_URL: file:///tmp/blob.blob
+      MZ_ORCHESTRATOR: process
+      MZ_ORCHESTRATOR_PROCESS_SECRETS_DIRECTORY: /tmp/secrets
     ports:
       - "${MATERIALIZED_PORT_DB_EXTERNAL}:${MATERIALIZED_PORT_DB_INTERNAL}"
       - "${MATERIALIZED_PORT_HTTP_EXTERNAL}:${MATERIALIZED_PORT_HTTP_INTERNAL}"
